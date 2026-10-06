@@ -13,7 +13,7 @@ import {
 } from "../map/buildingRegistry";
 import { addBuildings } from "../map/buildings";
 import { initialCamera, mapConfig } from "../map/config";
-import { isSeaViewDemoBuilding } from "../map/demoBuilding";
+import { DEMO_BUILDING_CENTER, isDemoBuilding } from "../map/demoBuilding";
 import {
   fetchDistricts,
   type DistrictData,
@@ -29,6 +29,7 @@ type MapError = "mapStartError" | "mapError" | "mapSlow" | "sourceError";
 export function DistrictMap() {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  const demoLinkHandled = useRef(false);
   const [language, setLanguage] = useState<Language>(() =>
     localStorage.getItem("hk-map-language") === "en" ? "en" : "zh",
   );
@@ -82,6 +83,39 @@ export function DistrictMap() {
       duration: reducedMotion ? 0 : 550,
     });
   }, []);
+
+  const goToDemoBuilding = useCallback(() => {
+    const district = districtData?.districts.find(
+      (item) => item.nameEn === "Tuen Mun District",
+    );
+    if (!district) return;
+    setSelectedDistrict(district);
+    setBuilding(null);
+    setSelection(null);
+    setRegistryStatus("");
+    mapRef.current?.flyTo({
+      center: DEMO_BUILDING_CENTER,
+      zoom: 17,
+      pitch: 35,
+      bearing: 0,
+      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? 0
+        : 700,
+    });
+  }, [districtData]);
+
+  useEffect(() => {
+    if (
+      !ready ||
+      !districtData ||
+      demoLinkHandled.current ||
+      new URLSearchParams(window.location.search).get("demo") !== "1"
+    )
+      return;
+    demoLinkHandled.current = true;
+    goToDemoBuilding();
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [ready, districtData, goToDemoBuilding]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -436,6 +470,15 @@ export function DistrictMap() {
         {identifyEnabled && (
           <p className="mt-2 text-xs text-slate-400">{t.identifyHint}</p>
         )}
+        {districtData && (
+          <button
+            type="button"
+            onClick={goToDemoBuilding}
+            className="mt-4 w-full rounded-lg border border-amber-300/50 bg-amber-300/10 px-3 py-2 text-left text-xs font-semibold text-amber-100 hover:bg-amber-300/20"
+          >
+            ★ {t.findDemoBuilding}
+          </button>
+        )}
         <p className="mt-3 text-[10px] leading-4 text-slate-500">
           {t.districtSource}
         </p>
@@ -447,7 +490,7 @@ export function DistrictMap() {
           onClose={() => setBuilding(null)}
         />
       )}
-      {building && !identifyEnabled && isSeaViewDemoBuilding(building) && (
+      {building && !identifyEnabled && isDemoBuilding(building) && (
         <AccessCodeDialog
           language={language}
           onClose={() => setBuilding(null)}

@@ -8,6 +8,7 @@ import type {
 import { setBasicBuildingsVisible } from "./buildings";
 import { districtSlug, type DistrictStat } from "./districts";
 import type { Language } from "../i18n";
+import { DEMO_BUILDING_CSUID } from "./demoBuilding";
 export type BuildingInfo = {
   noticeUpdated?: string;
   BuildingCSUID: string;
@@ -31,6 +32,7 @@ const overviewIds = [
   "registry-overview-footprints",
   "registry-overview-outline",
 ];
+const demoLabelId = "registry-demo-label";
 export function highlightBuildings(map: Map, mode: Highlight) {
   const palette: ExpressionSpecification = [
     "match",
@@ -153,6 +155,30 @@ export function mountBuildingRegistry(
     filter: relevant,
     paint: { "line-color": "#d9eeed", "line-width": 0.65, "line-opacity": 0.6 },
   });
+  if (district?.nameEn === "Tuen Mun District") {
+    map.addLayer({
+      id: demoLabelId,
+      type: "symbol",
+      source: "registry",
+      minzoom: 14.5,
+      filter: ["==", ["get", "BuildingCSUID"], DEMO_BUILDING_CSUID],
+      layout: {
+        "text-field":
+          language === "en"
+            ? "★ Floor plan demo · Block 1"
+            : "★ 圖則示範 · 新屯門中心第１座",
+        "text-size": 15,
+        "text-anchor": "bottom",
+        "text-offset": [0, -1.4],
+        "text-allow-overlap": true,
+      },
+      paint: {
+        "text-color": "#fff4c2",
+        "text-halo-color": "#401a1a",
+        "text-halo-width": 3,
+      },
+    });
+  }
   for (const l of map.getStyle().layers)
     if (l.type === "symbol") map.moveLayer(l.id);
   highlightBuildings(map, districtName ? "repair" : "notices");
@@ -274,7 +300,13 @@ export function mountBuildingRegistry(
   };
   const click = (e: MapMouseEvent) => {
     const f = map
-      .queryRenderedFeatures(e.point, { layers: [...ids, ...overviewIds] })
+      .queryRenderedFeatures(e.point, {
+        layers: [
+          ...ids,
+          ...overviewIds,
+          ...(map.getLayer(demoLabelId) ? [demoLabelId] : []),
+        ],
+      })
       .find((f) => f.properties?.BuildingCSUID);
     if (selected !== undefined)
       map.setFeatureState(
@@ -336,7 +368,7 @@ export function mountBuildingRegistry(
     map.off("moveend", update);
     map.off("click", click);
     if (map.getSource("registry")) {
-      for (const id of [...ids, ...overviewIds])
+      for (const id of [...ids, ...overviewIds, demoLabelId])
         if (map.getLayer(id)) map.removeLayer(id);
       map.removeSource("registry");
     }

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { copy, type Language } from "../i18n";
+import { publicFloorPlans } from "../map/floorPlans";
+import { DEMO_BUILDING_CSUID } from "../map/demoBuilding";
 
 export function AccessCodeDialog({
   language,
@@ -33,7 +35,7 @@ export function AccessCodeDialog({
         event.preventDefault();
         onClose();
       }}
-      aria-labelledby="sea-view-access-title"
+      aria-labelledby="demo-access-title"
       className="m-auto w-[min(400px,calc(100%-32px))] rounded-xl border border-white/20 bg-[#101719] p-0 text-slate-100 shadow-2xl backdrop:bg-black/70"
     >
       <form onSubmit={submit} className="p-6">
@@ -48,18 +50,18 @@ export function AccessCodeDialog({
         <p className="mb-2 text-xs font-medium uppercase tracking-widest text-teal-300">
           {t.demoBuilding}
         </p>
-        <h2 id="sea-view-access-title" className="text-xl font-semibold">
+        <h2 id="demo-access-title" className="text-xl font-semibold">
           {t.accessTitle}
         </h2>
         <p className="mt-2 text-sm text-slate-300">{t.accessHint}</p>
         <label
-          htmlFor="sea-view-access-code"
+          htmlFor="demo-access-code"
           className="mt-6 block text-sm text-slate-200"
         >
           {t.accessLabel}
         </label>
         <input
-          id="sea-view-access-code"
+          id="demo-access-code"
           ref={inputRef}
           type="password"
           inputMode="numeric"
@@ -89,7 +91,7 @@ export function AccessCodeDialog({
           {t.accessContinue}
         </button>
         <a
-          href="/sea-view-structure-preview.html"
+          href={publicFloorPlans[DEMO_BUILDING_CSUID].pageUrl}
           target="_blank"
           rel="noreferrer"
           className="mt-4 block text-center text-xs text-teal-300 underline underline-offset-2 hover:text-teal-200"
