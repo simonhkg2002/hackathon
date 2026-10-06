@@ -67,6 +67,7 @@ export const copy = {
     accessDigits: "只接受 6 位數字。",
     accessContinue: "繼續",
     accessPending: "驗證功能尚未設定；目前不會開放下一層內容。",
+    structurePreview: "查看公開資料結構示意（非室內圖則）",
   },
   en: {
     appTitle: "Hong Kong Building Map",
@@ -144,5 +145,6 @@ export const copy = {
     accessContinue: "Continue",
     accessPending:
       "Verification is not configured yet; the next layer remains locked.",
+    structurePreview: "View public structure preview (not a floor plan)",
   },
 } as const;

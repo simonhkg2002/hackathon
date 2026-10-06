@@ -88,6 +88,14 @@ export function AccessCodeDialog({
         >
           {t.accessContinue}
         </button>
+        <a
+          href="/sea-view-structure-preview.html"
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 block text-center text-xs text-teal-300 underline underline-offset-2 hover:text-teal-200"
+        >
+          {t.structurePreview}
+        </a>
       </form>
     </dialog>
   );
