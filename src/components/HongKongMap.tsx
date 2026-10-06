@@ -13,10 +13,8 @@ import {
   type MapMouseEvent,
 } from "maplibre-gl";
 import { applyDarkAppearance } from "../map/appearance";
-import { addBuildings, setBasicBuildingsVisible } from "../map/buildings";
+import { addBuildings } from "../map/buildings";
 import { initialCamera, mapConfig } from "../map/config";
-
-import type { ModelMode } from "../map/officialModels";
 import { identify } from "../services/identify";
 import { IdentifyPanel, type IdentifyState } from "./IdentifyPanel";
 
@@ -25,44 +23,15 @@ export function HongKongMap() {
   const mapRef = useRef<Map | null>(null);
   const [building, setBuilding] = useState<BuildingInfo | null>(null);
   const [registryStatus, setRegistryStatus] = useState("");
-  const [highlight, setHighlight] = useState<Highlight>("all");
+  const [highlight, setHighlight] = useState<Highlight>("notices");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   const [ready, setReady] = useState(false);
-  const [mode, setMode] = useState<ModelMode>("basic");
-  const [modelStatus, setModelStatus] = useState("");
-  const [modelAttempt, setModelAttempt] = useState(0);
   const [identifyEnabled, setIdentifyEnabled] = useState(false);
   const [selection, setSelection] = useState<IdentifyState | null>(null);
   const [queryAttempt, setQueryAttempt] = useState(0);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-    if (mode === "basic") {
-      setBasicBuildingsVisible(map, true);
-      setModelStatus("依縮放顯示建築 · 遠看輪廓，近看立體");
-      return;
-    }
-    let cancelled = false;
-    let cleanup: (() => void) | undefined;
-    setModelStatus("正在準備精細模型…");
-    void import("../map/officialModels")
-      .then(({ mountOfficialModels }) => {
-        if (!cancelled && mapRef.current === map)
-          cleanup = mountOfficialModels(map, mode, setModelStatus);
-      })
-      .catch(() => {
-        if (!cancelled)
-          setModelStatus("精細模型無法啟動，請重試或切回日常瀏覽。");
-      });
-    return () => {
-      cancelled = true;
-      cleanup?.();
-    };
-  }, [ready, mode, modelAttempt]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -84,13 +53,13 @@ export function HongKongMap() {
   useEffect(() => {
     const map = mapRef.current;
     setBuilding(null);
-    if (!map || !ready || mode !== "basic" || identifyEnabled) return;
+    if (!map || !ready || identifyEnabled) return;
     return mountBuildingRegistry(map, setRegistryStatus, setBuilding);
-  }, [ready, mode, identifyEnabled]);
+  }, [ready, identifyEnabled]);
   useEffect(() => {
-    if (mapRef.current && ready && mode === "basic" && !identifyEnabled)
+    if (mapRef.current && ready && !identifyEnabled)
       highlightBuildings(mapRef.current, highlight);
-  }, [ready, mode, identifyEnabled, highlight]);
+  }, [ready, identifyEnabled, highlight]);
 
   const longitude = selection?.coordinate[0];
   const latitude = selection?.coordinate[1];
@@ -241,33 +210,13 @@ export function HongKongMap() {
         </h1>
       </div>
       <section
-        aria-label="地圖模型與查詢"
+        aria-label="樓宇資料與查詢"
         className="absolute z-10 left-5 top-32 max-h-[calc(100dvh-180px)] overflow-y-auto max-w-[calc(100%-90px)] rounded-xl border border-white/10 bg-[#101719]/95 p-3 shadow-xl sm:left-7"
       >
-        <label
-          htmlFor="model-mode"
-          className="mb-2 block text-xs text-slate-400"
-        >
-          地圖顯示
-        </label>
-        <select
-          id="model-mode"
-          value={mode}
-          onChange={(e) => setMode(e.target.value as ModelMode)}
-          className="w-full rounded border border-white/15 bg-[#182126] px-3 py-2 text-sm"
-        >
-          <option value="basic">日常瀏覽 · 輕量建築</option>
-          <option value="spatial">精細模型 · 3D Spatial Data</option>
-        </select>
-        <p role="status" className="mt-2 max-w-64 text-xs text-slate-400">
-          {modelStatus}
-        </p>
         <p className="mt-2 max-w-64 text-xs leading-relaxed text-slate-500">
-          {mode === "basic"
-            ? "縮遠顯示關注樓宇顏色；放大後顯示更多立體建築。"
-            : "完整建築與山體，適合近距離查看；載入較慢。"}
+          輕量建築 · 放大後顯示更多立體建築。
         </p>
-        {mode === "basic" && !identifyEnabled && (
+        {!identifyEnabled && (
           <div className="mt-3 max-w-64 border-t border-white/10 pt-3">
             <label
               htmlFor="building-highlight"
@@ -281,6 +230,7 @@ export function HongKongMap() {
               onChange={(e) => setHighlight(e.target.value as Highlight)}
               className="mt-2 w-full rounded border border-white/15 bg-[#182126] p-2 text-xs"
             >
+              <option value="notices">修葺令與驗樓通知（預設）</option>
               <option value="all">全部關注類別</option>
               <option value="repair">曾發出修葺令</option>
               <option value="inspection">曾發出驗樓通知</option>
@@ -288,12 +238,23 @@ export function HongKongMap() {
               <option value="near">45–49 年</option>
               <option value="none">關閉標色</option>
             </select>
-            <p className="mt-2 text-[11px] leading-5">
-              <span className="text-rose-300">● 修葺令</span>{" "}
-              <span className="text-amber-200">● 驗樓</span>
-              <br />
-              <span className="text-purple-300">● 50+ 年</span>{" "}
-              <span className="text-cyan-300">● 45–49 年</span>
+            <p className="mt-2 flex max-w-64 flex-wrap gap-x-3 text-[11px] leading-5">
+              {(highlight === "notices" ||
+                highlight === "all" ||
+                highlight === "repair") && (
+                <span className="text-rose-300">● 修葺令</span>
+              )}
+              {(highlight === "notices" ||
+                highlight === "all" ||
+                highlight === "inspection") && (
+                <span className="text-amber-200">● 驗樓</span>
+              )}
+              {(highlight === "all" || highlight === "old") && (
+                <span className="text-purple-300">● 50+ 年</span>
+              )}
+              {(highlight === "all" || highlight === "near") && (
+                <span className="text-cyan-300">● 45–49 年</span>
+              )}
             </p>
             <p role="status" className="mt-2 text-xs text-slate-400">
               {registryStatus}
@@ -303,14 +264,6 @@ export function HongKongMap() {
               樓齡；通知紀錄不等於正在維修。
             </p>
           </div>
-        )}
-        {mode !== "basic" && (
-          <button
-            onClick={() => setModelAttempt((n) => n + 1)}
-            className="mt-2 text-xs text-teal-300 hover:underline"
-          >
-            重新載入模型
-          </button>
         )}
         <label className="mt-3 flex cursor-pointer items-center gap-2 border-t border-white/10 pt-3 text-sm">
           <input
@@ -330,7 +283,7 @@ export function HongKongMap() {
           </p>
         )}
       </section>
-      {building && mode === "basic" && !identifyEnabled && (
+      {building && !identifyEnabled && (
         <BuildingPanel building={building} onClose={() => setBuilding(null)} />
       )}
       {selection && (

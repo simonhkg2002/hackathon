@@ -1,0 +1,101 @@
+{
+  "fetchedAt": "2026-10-06T10:53:33.723900+00:00",
+  "repairLastUpdate": "1788799211000",
+  "orderSource": "https://data.gov.hk/en-data/dataset/hk-bd-opendata-s26-order-1",
+  "boundarySource": "https://www.had.gov.hk/psi/hong-kong-administrative-boundaries/hksar_18_district_boundary.json",
+  "totalOrders": 1787,
+  "totalBuildings": 1319,
+  "unmatchedBuildings": 0,
+  "districts": [
+    {
+      "name": "油尖旺區",
+      "orders": 347,
+      "buildings": 269
+    },
+    {
+      "name": "東區",
+      "orders": 187,
+      "buildings": 136
+    },
+    {
+      "name": "深水埗區",
+      "orders": 164,
+      "buildings": 132
+    },
+    {
+      "name": "荃灣區",
+      "orders": 163,
+      "buildings": 89
+    },
+    {
+      "name": "中西區",
+      "orders": 162,
+      "buildings": 148
+    },
+    {
+      "name": "九龍城區",
+      "orders": 148,
+      "buildings": 119
+    },
+    {
+      "name": "灣仔區",
+      "orders": 124,
+      "buildings": 98
+    },
+    {
+      "name": "葵青區",
+      "orders": 108,
+      "buildings": 53
+    },
+    {
+      "name": "黃大仙區",
+      "orders": 80,
+      "buildings": 55
+    },
+    {
+      "name": "屯門區",
+      "orders": 70,
+      "buildings": 52
+    },
+    {
+      "name": "觀塘區",
+      "orders": 68,
+      "buildings": 52
+    },
+    {
+      "name": "沙田區",
+      "orders": 59,
+      "buildings": 26
+    },
+    {
+      "name": "南區",
+      "orders": 33,
+      "buildings": 27
+    },
+    {
+      "name": "大埔區",
+      "orders": 33,
+      "buildings": 28
+    },
+    {
+      "name": "元朗區",
+      "orders": 29,
+      "buildings": 23
+    },
+    {
+      "name": "北區",
+      "orders": 9,
+      "buildings": 9
+    },
+    {
+      "name": "離島區",
+      "orders": 3,
+      "buildings": 3
+    },
+    {
+      "name": "西貢區",
+      "orders": 0,
+      "buildings": 0
+    }
+  ]
+}

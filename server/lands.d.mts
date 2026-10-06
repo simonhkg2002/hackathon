@@ -1,7 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-export function createLandsMiddleware(
-  env: Record<string, string | undefined>,
-): (
+export function createLandsMiddleware(): (
   req: IncomingMessage,
   res: ServerResponse,
   next: () => void,

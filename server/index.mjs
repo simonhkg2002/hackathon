@@ -15,7 +15,7 @@ const mime = {
   ".svg": "image/svg+xml",
   ".png": "image/png",
 };
-const api = createLandsMiddleware(process.env);
+const api = createLandsMiddleware();
 createServer((req, res) => {
   void buildingsMiddleware(req, res, () => {
     void api(req, res, () => {

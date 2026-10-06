@@ -23,7 +23,7 @@ export type BuildingInfo = {
   records: string;
 };
 export type Highlight =
-  "all" | "repair" | "inspection" | "old" | "near" | "none";
+  "notices" | "all" | "repair" | "inspection" | "old" | "near" | "none";
 const ids = ["registry-footprints", "registry-buildings", "registry-outline"];
 const overviewIds = [
   "registry-overview-footprints",
@@ -44,7 +44,9 @@ export function highlightBuildings(map: Map, mode: Highlight) {
     "#526a74",
   ];
   const matches: ExpressionSpecification =
-    mode === "repair" || mode === "inspection"
+    mode === "notices"
+      ? ["any", [">", ["get", "repair"], 0], [">", ["get", "inspection"], 0]]
+      : mode === "repair" || mode === "inspection"
       ? [">", ["get", mode], 0]
       : mode === "old"
         ? ["all", ["!=", ["get", "age"], null], [">=", ["get", "age"], 50]]
@@ -57,6 +59,7 @@ export function highlightBuildings(map: Map, mode: Highlight) {
             ]
           : ["literal", mode === "all"];
   const colors = {
+    notices: "#526a74",
     repair: "#f18277",
     inspection: "#e8b961",
     old: "#ba9ae8",
@@ -68,7 +71,7 @@ export function highlightBuildings(map: Map, mode: Highlight) {
     ["boolean", ["feature-state", "selected"], false],
     "#ffffff",
     matches,
-    mode === "all" ? palette : colors[mode],
+    mode === "all" || mode === "notices" ? palette : colors[mode],
     "#526a74",
   ];
   for (const id of [ids[0], overviewIds[0]])
@@ -145,13 +148,12 @@ export function mountBuildingRegistry(
   });
   for (const l of map.getStyle().layers)
     if (l.type === "symbol") map.moveLayer(l.id);
-  highlightBuildings(map, "all");
+  highlightBuildings(map, "notices");
   let controller: AbortController | undefined;
   let disposed = false;
   let selected: number | string | undefined;
   let loadedBounds: number[] | undefined;
   let total = 0;
-  let highlightTotal = 0;
   let loadedProfile: "detail" | "overview" | undefined;
   let lastZoom = map.getZoom();
   const showOfficial = (visible: boolean) => {
@@ -168,7 +170,7 @@ export function mountBuildingRegistry(
       showOfficial(false);
       status(
         loadedBounds && zoom >= 12
-          ? `保留已載入區域的 ${highlightTotal.toLocaleString()} 個關注輪廓；放大後可補載新區域。`
+          ? "保留已載入區域的關注輪廓；放大後可補載新區域。"
           : "放大至縮放 13.25+ 可載入樓宇關注標色；15+ 可查看完整官方輪廓。",
       );
       return;
@@ -185,7 +187,7 @@ export function mountBuildingRegistry(
     }
     if (profile === "overview" && loadedBounds && zoomedOut) {
       status(
-        `縮遠保留已載入區域的 ${highlightTotal.toLocaleString()} 個關注輪廓；普通建築維持精簡。`,
+        "縮遠保留已載入區域的關注輪廓；普通建築維持精簡。",
       );
       return;
     }
@@ -203,7 +205,7 @@ export function mountBuildingRegistry(
       status(
         profile === "detail"
           ? `已載入 ${total.toLocaleString()} 個官方建築輪廓（視野及緩衝區）`
-          : `已載入 ${highlightTotal.toLocaleString()} 個關注輪廓；按篩選顯示，普通建築維持精簡。`,
+          : "已載入官方關注資料；按篩選顯示，普通建築維持精簡。",
       );
       return;
     }
@@ -244,15 +246,11 @@ export function mountBuildingRegistry(
       loadedBounds = box;
       loadedProfile = profile;
       total = data.features.length;
-      highlightTotal = data.features.filter(
-        (f: { properties: { category: string } }) =>
-          f.properties.category !== "normal",
-      ).length;
       showOfficial(profile === "detail");
       status(
         profile === "detail"
           ? `已載入 ${total.toLocaleString()} 個官方建築輪廓 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`
-          : `已載入 ${highlightTotal.toLocaleString()} 個關注輪廓，按篩選顯示 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`,
+          : `官方關注資料已載入，按篩選顯示 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`,
       );
     } catch {
       if (!disposed && !current.signal.aborted) {
