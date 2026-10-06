@@ -68,6 +68,10 @@ export const copy = {
     accessContinue: "繼續",
     accessPending: "驗證功能尚未設定；目前不會開放下一層內容。",
     structurePreview: "查看公開資料結構示意（非室內圖則）",
+    floorPlanTitle: "新屯門中心第１座 · 公開參考平面圖",
+    floorPlanCaution: "1–43 樓參考圖；同座其他樓層另有圖則。此圖由第三方提供，不是屋宇署核准圖則，亦不能證明目前室內格局。",
+    openFloorPlan: "開啟第１座 1–43 樓平面圖",
+    floorPlanSource: "原始頁面",
   },
   en: {
     appTitle: "Hong Kong Building Map",
@@ -146,5 +150,9 @@ export const copy = {
     accessPending:
       "Verification is not configured yet; the next layer remains locked.",
     structurePreview: "View public structure preview (not a floor plan)",
+    floorPlanTitle: "Sun Tuen Mun Centre Block 1 · public reference plan",
+    floorPlanCaution: "Reference for floors 1–43; other floor variants are listed by the source. This third-party plan is not a Buildings Department approved plan and may not reflect the present interior.",
+    openFloorPlan: "Open Block 1 floors 1–43 plan",
+    floorPlanSource: "source page",
   },
 } as const;

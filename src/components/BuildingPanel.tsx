@@ -1,5 +1,6 @@
 import type { BuildingInfo } from "../map/buildingRegistry";
 import { copy, type Language } from "../i18n";
+import { publicFloorPlans } from "../map/floorPlans";
 type Record = {
   block: string;
   address: string;
@@ -19,6 +20,7 @@ export function BuildingPanel({
 }) {
   const t = copy[language];
   const records: Record[] = JSON.parse(b.records || "[]");
+  const floorPlan = publicFloorPlans[b.BuildingCSUID];
   return (
     <section
       aria-label={t.buildingInfo}
@@ -70,6 +72,20 @@ export function BuildingPanel({
         {b.inspectionResolved || t.noResolved}
       </p>
       <p className="mt-3 text-xs leading-relaxed text-slate-400">{t.warning}</p>
+      {floorPlan && (
+        <div className="mt-4 rounded-lg border border-teal-400/25 bg-teal-950/25 p-3 text-xs">
+          <p className="font-semibold text-teal-200">{t.floorPlanTitle}</p>
+          <p className="mt-1 leading-relaxed text-slate-300">{t.floorPlanCaution}</p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            <a className="text-teal-300 underline" href={floorPlan.imageUrl} target="_blank" rel="noreferrer">
+              {t.openFloorPlan}
+            </a>
+            <a className="text-teal-300 underline" href={floorPlan.pageUrl} target="_blank" rel="noreferrer">
+              {floorPlan.source} {t.floorPlanSource}
+            </a>
+          </div>
+        </div>
+      )}
       {records.length === 0 && (
         <p className="mt-3 text-slate-400">{t.noPermit}</p>
       )}
