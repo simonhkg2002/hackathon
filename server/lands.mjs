@@ -12,6 +12,7 @@ export function createLandsMiddleware() {
     if (url.pathname === "/api/lands/identify") {
       const x = Number(url.searchParams.get("x"));
       const y = Number(url.searchParams.get("y"));
+      const lang = url.searchParams.get("lang") || "zh";
       if (
         !url.searchParams.has("x") ||
         !url.searchParams.has("y") ||
@@ -20,7 +21,8 @@ export function createLandsMiddleware() {
         x < 780000 ||
         x > 880000 ||
         y < 790000 ||
-        y > 860000
+        y > 860000 ||
+        !["zh", "en"].includes(lang)
       ) {
         res.writeHead(400).end("Invalid HK80 coordinates");
         return;
@@ -29,7 +31,7 @@ export function createLandsMiddleware() {
       upstream.search = new URLSearchParams({
         x: String(x),
         y: String(y),
-        lang: "zh",
+        lang,
       }).toString();
     } else {
       res.writeHead(404).end();

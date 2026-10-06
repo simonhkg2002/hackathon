@@ -1,4 +1,4 @@
-import { HongKongMap } from "./components/HongKongMap";
+import { DistrictMap } from "./components/DistrictMap";
 export default function App() {
-  return <HongKongMap />;
+  return <DistrictMap />;
 }

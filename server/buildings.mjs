@@ -2,8 +2,14 @@ import { readFile, stat } from "node:fs/promises";
 const endpoint =
   "https://portal.csdi.gov.hk/server/rest/services/common/landsd_rcd_1637211194312_35158/FeatureServer/0/query";
 const registryPath = new URL("../data/building-registry.json", import.meta.url);
+const districtsPath = new URL(
+  "../data/district-repair-stats.json",
+  import.meta.url,
+);
 let registryPromise;
 let registryMtime = 0;
+let districtsPromise;
+let districtsMtime = 0;
 async function loadRegistry() {
   const modified = (await stat(registryPath)).mtimeMs;
   if (!registryPromise || modified !== registryMtime) {
@@ -12,6 +18,22 @@ async function loadRegistry() {
     cache.clear();
   }
   return registryPromise;
+}
+async function loadDistricts() {
+  const modified = (await stat(districtsPath)).mtimeMs;
+  if (!districtsPromise || modified !== districtsMtime) {
+    districtsMtime = modified;
+    districtsPromise = readFile(districtsPath, "utf8").then((text) => {
+      const data = JSON.parse(text);
+      const byBlock = new Map();
+      for (const district of data.districts)
+        for (const point of district.points)
+          byBlock.set(point.block, district.name);
+      return { names: new Set(data.districts.map((d) => d.name)), byBlock };
+    });
+    cache.clear();
+  }
+  return districtsPromise;
 }
 const cache = new Map();
 export function ageOn(date, now = new Date()) {
@@ -85,9 +107,14 @@ export async function buildingsMiddleware(req, res, next) {
     return;
   }
   const onlyHighlights = url.searchParams.get("only") === "highlights";
+  const onlyRepair = url.searchParams.get("only") === "repair";
+  const districtName = url.searchParams.get("district");
+  const lightweight = onlyHighlights || onlyRepair;
   const bbox = (url.searchParams.get("bbox") || "").split(",").map(Number);
   if (
-    (url.searchParams.has("only") && !onlyHighlights) ||
+    (url.searchParams.has("only") && !lightweight) ||
+    (districtName !== null && !onlyRepair) ||
+    (onlyRepair && !districtName) ||
     bbox.length !== 4 ||
     bbox.some((n) => !Number.isFinite(n)) ||
     bbox[0] < 113.8 ||
@@ -96,16 +123,21 @@ export async function buildingsMiddleware(req, res, next) {
     bbox[3] > 22.6 ||
     bbox[0] >= bbox[2] ||
     bbox[1] >= bbox[3] ||
-    bbox[2] - bbox[0] > (onlyHighlights ? 0.18 : 0.09) ||
-    bbox[3] - bbox[1] > (onlyHighlights ? 0.18 : 0.09)
+    bbox[2] - bbox[0] > (lightweight ? 0.18 : 0.09) ||
+    bbox[3] - bbox[1] > (lightweight ? 0.18 : 0.09)
   ) {
     res.writeHead(400).end("Invalid Hong Kong viewport");
     return;
   }
   try {
     const registry = await loadRegistry();
+    const districts = districtName ? await loadDistricts() : null;
+    if (districtName && !districts.names.has(districtName)) {
+      res.writeHead(400).end("Unknown district");
+      return;
+    }
     const key = bbox.join(",");
-    const cacheKey = (onlyHighlights ? "highlights:" : "detail:") + key;
+    const cacheKey = `${onlyHighlights ? "highlights" : onlyRepair ? "repair" : "detail"}:${districtName || ""}:${key}`;
     let result = cache.get(cacheKey);
     if (!result || Date.now() - result.at > 600000) {
       const features = [];
@@ -138,8 +170,17 @@ export async function buildingsMiddleware(req, res, next) {
           const p = f.properties;
           if (!seen.has(p.OBJECTID)) {
             seen.add(p.OBJECTID);
-            const enriched = enrich(p, registry.buildings[p.BuildingCSUID]);
+            const entry = registry.buildings[p.BuildingCSUID];
+            if (
+              districtName &&
+              !(entry?.repair || []).some(
+                (r) => districts.byBlock.get(r.block) === districtName,
+              )
+            )
+              continue;
+            const enriched = enrich(p, entry);
             if (onlyHighlights && enriched.category === "normal") continue;
+            if (onlyRepair && enriched.repair <= 0) continue;
             features.push({
               ...f,
               id: p.OBJECTID,

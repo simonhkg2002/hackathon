@@ -38,3 +38,30 @@ test("Empty results and invalid responses remain distinct", () => {
   assert.deepEqual(parseIdentify({ results: [] }), []);
   assert.throws(() => parseIdentify({ error: "failed" }));
 });
+test("English Identify prefers English names and details", () => {
+  const rows = parseIdentify(
+    {
+      results: [
+        {
+          cheader: "建築",
+          eheader: "Building",
+          addressInfo: [
+            {
+              uniqueId: "1",
+              cname: "文化中心",
+              ename: "Cultural Centre",
+              caddress: "梳士巴利道",
+              eaddress: "Salisbury Road",
+              eextrainfo: { Hours: "Daily" },
+            },
+          ],
+        },
+      ],
+    },
+    "en",
+  );
+  assert.equal(rows[0].name, "Cultural Centre");
+  assert.equal(rows[0].address, "Salisbury Road");
+  assert.equal(rows[0].category, "Building");
+  assert.deepEqual(rows[0].details, [["Hours", "Daily"]]);
+});

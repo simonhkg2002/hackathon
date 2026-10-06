@@ -26,10 +26,10 @@ export const mapConfig = {
 
 export const initialCamera: CameraOptions = {
   center: [
-    numberSetting(import.meta.env.VITE_MAP_LONGITUDE, 114.166, -180, 180),
-    numberSetting(import.meta.env.VITE_MAP_LATITUDE, 22.289, -85, 85),
+    numberSetting(import.meta.env.VITE_MAP_LONGITUDE, 114.16, -180, 180),
+    numberSetting(import.meta.env.VITE_MAP_LATITUDE, 22.35, -85, 85),
   ],
-  zoom: numberSetting(import.meta.env.VITE_MAP_ZOOM, 14.4, 2, 20),
-  pitch: numberSetting(import.meta.env.VITE_MAP_PITCH, 45, 0, 75),
-  bearing: numberSetting(import.meta.env.VITE_MAP_BEARING, -20, -180, 180),
+  zoom: numberSetting(import.meta.env.VITE_MAP_ZOOM, 10.5, 2, 20),
+  pitch: numberSetting(import.meta.env.VITE_MAP_PITCH, 0, 0, 75),
+  bearing: numberSetting(import.meta.env.VITE_MAP_BEARING, 0, -180, 180),
 };

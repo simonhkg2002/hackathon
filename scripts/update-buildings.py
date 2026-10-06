@@ -72,10 +72,10 @@ for feature in boundaries:
     rings = feature['geometry']['coordinates']
     if feature['geometry']['type'] != 'Polygon': raise RuntimeError('Unexpected district geometry')
     outer = rings[0]
-    districts.append(dict(name=feature['properties']['地區'], rings=rings,
+    districts.append(dict(name=feature['properties']['地區'], nameEn=feature['properties']['District'], rings=rings,
                           bbox=(min(p[0] for p in outer), min(p[1] for p in outer),
                                 max(p[0] for p in outer), max(p[1] for p in outer)),
-                          orders=0, buildings=0))
+                          orders=0, buildings=0, points=[]))
 if len(districts) != 18: raise RuntimeError('Expected 18 districts')
 unmatched = 0
 seen_blocks = set()
@@ -90,9 +90,23 @@ for row in repair_rows:
     if not matches:
         unmatched += 1
         continue
-    matches[0]['orders'] += int(row['Cum_s26Orders_Issued_EN'] or 0)
+    count = int(row['Cum_s26Orders_Issued_EN'] or 0)
+    matches[0]['orders'] += count
     matches[0]['buildings'] += 1
-district_counts = sorted(({k: d[k] for k in ('name','orders','buildings')} for d in districts),
+    matches[0]['points'].append(dict(block=block, coordinate=[x,y], orders=count))
+for d in districts:
+    if d['points']:
+        xs = sorted(p['coordinate'][0] for p in d['points'])
+        ys = sorted(p['coordinate'][1] for p in d['points'])
+        middle = (xs[len(xs)//2], ys[len(ys)//2])
+        d['center'] = min(d['points'], key=lambda p: (p['coordinate'][0]-middle[0])**2+(p['coordinate'][1]-middle[1])**2)['coordinate']
+    else:
+        west, south, east, north = d['bbox']
+        candidates = [[west+(east-west)*i/20, south+(north-south)*j/20] for i in range(1,20) for j in range(1,20)]
+        inside = [p for p in candidates if inside_polygon(*p, d['rings'])]
+        if not inside: raise RuntimeError('District has no interior point')
+        d['center'] = min(inside, key=lambda p: (p[0]-(west+east)/2)**2+(p[1]-(south+north)/2)**2)
+district_counts = sorted(({k: d[k] for k in ('name','nameEn','orders','buildings','center','bbox','points')} for d in districts),
                          key=lambda d: (-d['orders'], d['name']))
 fetched_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
 district_stats = dict(fetchedAt=fetched_at, repairLastUpdate=updates['repair'],
@@ -102,7 +116,7 @@ district_stats = dict(fetchedAt=fetched_at, repairLastUpdate=updates['repair'],
                       districts=district_counts)
 if sum(d['buildings'] for d in district_counts) + unmatched != len(repair_rows):
     raise RuntimeError('District assignment is incomplete')
-print('District ranking', district_counts[:3], 'unmatched', unmatched, flush=True)
+print('District ranking', [(d['name'], d['orders'], d['buildings']) for d in district_counts[:3]], 'unmatched', unmatched, flush=True)
 out = dict(fetchedAt=fetched_at, opCount=len(ops), matchedCount=sum(bool(v.get('records')) for v in registry.values()), counts=counts, updates=updates, buildings=registry)
 p = pathlib.Path(__file__).resolve().parent.parent/'data/building-registry.json'
 tmp=p.with_suffix('.tmp'); tmp.write_text(json.dumps(out, ensure_ascii=False, separators=(',',':')))

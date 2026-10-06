@@ -1,4 +1,5 @@
 import { buildingsMiddleware } from "./buildings.mjs";
+import { districtsMiddleware } from "./districts.mjs";
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -18,7 +19,8 @@ const mime = {
 const api = createLandsMiddleware();
 createServer((req, res) => {
   void buildingsMiddleware(req, res, () => {
-    void api(req, res, () => {
+    void districtsMiddleware(req, res, () => {
+      void api(req, res, () => {
       void (async () => {
         try {
           const pathname = decodeURIComponent(
@@ -48,6 +50,7 @@ createServer((req, res) => {
             .end("Build the application with npm run build first.");
         }
       })();
+      });
     });
   });
 }).listen(

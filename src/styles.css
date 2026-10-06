@@ -37,3 +37,13 @@
 .maplibregl-ctrl-attrib a {
   @apply text-slate-300;
 }
+
+.district-badge {
+  @apply flex h-[70px] w-[70px] flex-col items-center justify-center rounded-full border-2 border-rose-200 bg-rose-800/95 text-center text-white shadow-xl shadow-black/40 transition hover:scale-110 hover:bg-rose-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
+}
+.district-badge strong {
+  @apply text-xl leading-6;
+}
+.district-badge span {
+  @apply max-w-[64px] truncate text-[9px] leading-3;
+}

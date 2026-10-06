@@ -1,6 +1,6 @@
 # Hong Kong 3D Map
 
-A minimal full-window React + TypeScript map, built with Vite, MapLibre GL JS and Tailwind CSS. The default camera looks across Victoria Harbour at a 45° pitch. OpenFreeMap's dark vector style supplies land, coastline, water, roads and labels from OpenStreetMap-compatible data.
+A minimal full-window React + TypeScript map, built with Vite, MapLibre GL JS and Tailwind CSS. The default camera shows a district-level overview of Hong Kong. OpenFreeMap's dark vector style supplies land, coastline, water, roads and labels from OpenStreetMap-compatible data.
 
 ## Run locally
 
@@ -20,14 +20,15 @@ npm run lint
 npm run format
 ```
 
-For the complete app, run `npm run build` then `npm start`. The Node server serves `dist/` and the same-origin building and Identify endpoints on `127.0.0.1:4173` (override `HOST` and `PORT` for your deployment). A static-only host cannot provide these endpoints without an equivalent backend. `VITE_*` settings are embedded at build time. Restart after changing them.
+For the complete app, run `npm run build` then `npm start`. The Node server serves `dist/` and the same-origin district, building and Identify endpoints on `127.0.0.1:4173` (override `HOST` and `PORT` for your deployment). A static-only host cannot provide these endpoints without an equivalent backend. `VITE_*` settings are embedded at build time. Restart after changing them.
 
 ## Controls
 
 - Drag to pan; scroll/pinch or use + / − to zoom.
 - Right-drag or Ctrl-drag to rotate and tilt. On touch screens, use two fingers to rotate or tilt.
 - The compass indicates north; click it to restore north-up and drag it to rotate.
-- The reset button returns to the initial harbour camera.
+- The reset button returns to the 18-district overview. Click a district badge or choose one from the complete list to inspect its repair-order buildings.
+- Use 繁中 / EN to switch interface and Identify result language; the choice persists in this browser.
 - Focus the map canvas: arrow keys pan, + / − zoom, Shift + left/right rotate, and Shift + up/down change pitch.
 
 ## Configuration
@@ -47,7 +48,7 @@ src/
   App.tsx                     App entry
   main.tsx                    React root and CSS imports
   styles.css                  Tailwind and basic MapLibre control styling
-  components/HongKongMap.tsx   Map lifecycle, navigation, reset, loading/error UI
+  components/DistrictMap.tsx  District navigation, language switch and map lifecycle
   map/config.ts               Environment settings and initial camera
   map/buildings.ts            Source-based 3D extrusion layer
   map/appearance.ts           Dark map colors and label contrast
@@ -66,29 +67,18 @@ Keep the map's built-in attribution visible. Map data and tile service terms app
 
 ## Identify
 
-開啟 Identify 後點選地圖，程式將 WGS84 轉為 HK80，透過同源代理查詢地政總署的建築、地址與設施資料。點選屋頂時查詢的是地圖點位，不保證對應該建築。`server/lands.mjs` 僅轉發香港範圍內的 Identify 座標；無需 API key。正式部署仍應依流量需要設定限流。服務 URL：`https://www.map.gov.hk/gs/api/v1.0.0/identify?x={HK80_X}&y={HK80_Y}&lang=zh`。
+開啟 Identify 後點選地圖，程式將 WGS84 轉為 HK80，透過同源代理查詢地政總署的建築、地址與設施資料。點選屋頂時查詢的是地圖點位，不保證對應該建築。`server/lands.mjs` 僅轉發香港範圍內的 Identify 座標；無需 API key。正式部署仍應依流量需要設定限流。服務 URL：`https://www.map.gov.hk/gs/api/v1.0.0/identify?x={HK80_X}&y={HK80_Y}&lang={zh|en}`。
 
 完整擴充資料來源清單見 [香港地圖 API 清單](docs/HONG_KONG_APIS.zh-Hant.md)。
 
-## 日常瀏覽的顯示取捨
+## 地區總覽與樓宇顯示
 
-地圖只載入輕量建築與按視野查詢的官方建築輪廓；不載入精細 3D Tiles。
+預設以 18 區標記呈現自 2023 年 5 月起曾獲發第 26 條修葺令的**樓座數**，而非命令份數或正在維修數。密集地區的標記會避讓，完整 18 區可從清單選擇。按區後鏡頭放大，伺服器只傳送該區、當前視野內有修葺令紀錄的官方樓宇輪廓；縮放 15 以上以來源高度顯示立體樓宇。灰色 OSM 建築在區域模式隱藏，以突出紅色樓宇。地圖仍可平移探索該區其他街道。
 
-| 視距（zoom） | 建築顯示                                  |
-| ------------ | ----------------------------------------- |
-| 12–13.5      | 淡色平面輪廓，保留街廓                    |
-| 13.25–15.5    | 輪廓 + 來源高度至少 60 m 的高樓           |
-| 15.5–16.5    | 輪廓 + 來源高度至少 20 m 的建築           |
-| 16.5 以上    | 所有有高度資料且未標記 hide_3d 的立體建築 |
+前端只接收小量地區摘要；樓座與 CSUID 配對留在伺服器。`data/district-repair-stats.json` 可由 `npm run data:refresh` 更新。地區數字按屋宇署 `BLOCK_ID_EN` 去重，不把一棟樓的多個 3D 輪廓計成多棟。統計只涵蓋公開資料的時段，沒有現時施工或棚網狀態。
 
-高度缺失仍保留平面輪廓，不臆造樓高。高樓篩選只是視覺層級，不代表官方地標分類。三段立體圖層的 zoom 範圍不重疊，不重複畫同一幢建築；切換門檻會出現更多建築。
+## 樓宇資料
 
-繪製順序修正為地表／建築輪廓 → 道路 → 不透明立體建築 → 地名。原本將建築插入第一個文字層前，但該文字層是水域標籤，後面仍有道路，造成覆蓋。預設 pitch 改為 45°，減少遮住街道；道路按幹道／支路降低對比，小街名稱與方向箭頭留待放大後顯示。`VITE_MAP_PITCH` 仍可覆蓋預設。
+點選紅色樓宇可查看名稱、樓齡（入伙紙日期）、高度、層數、用途，以及曾發出和已遵從／撤銷／被取代的驗樓／修葺令紀錄。樓齡不代表樓宇不安全。完整資料來源及限制見 [樓宇資料說明](docs/BUILDING_DATA.zh-Hant.md)。
 
-篩選改善 GPU 繪製與視覺密度，不代表向量圖磚的下載量同比減少。
-
-## 樓宇資料與標色
-
-日常瀏覽在縮放 13.25–15 時，只載入視野內有關注分類的官方樓宇彩色平面輪廓；普通建築維持精簡的 OSM 顯示。放大至縮放 15 後，會載入視野內完整官方建築輪廓。點選可查看名稱、樓齡（入伙紙日期）、高度、層數、用途及曾發出、已遵從／撤銷／被取代的驗樓／修葺令紀錄。預設只標示修葺令及驗樓通知；左側可手動選擇其他關注類別。45–49 年為「接近 50 年」分組；灰色不代表安全或沒有維修需要。
-
-更新資料：`npm run data:refresh`（Python 3），完成後重新整理地圖。正式部署須帶同 `data/` 目錄。詳細配對方式、18 區修葺令統計及「正在維修」資料限制，見 [樓宇資料說明](docs/BUILDING_DATA.zh-Hant.md)。
+更新資料：`npm run data:refresh`（Python 3），完成後重新整理地圖。正式部署須帶同 `data/` 目錄。

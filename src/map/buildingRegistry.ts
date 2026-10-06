@@ -6,6 +6,7 @@ import type {
   MapMouseEvent,
 } from "maplibre-gl";
 import { setBasicBuildingsVisible } from "./buildings";
+import type { Language } from "../i18n";
 export type BuildingInfo = {
   noticeUpdated?: string;
   BuildingCSUID: string;
@@ -47,17 +48,17 @@ export function highlightBuildings(map: Map, mode: Highlight) {
     mode === "notices"
       ? ["any", [">", ["get", "repair"], 0], [">", ["get", "inspection"], 0]]
       : mode === "repair" || mode === "inspection"
-      ? [">", ["get", mode], 0]
-      : mode === "old"
-        ? ["all", ["!=", ["get", "age"], null], [">=", ["get", "age"], 50]]
-        : mode === "near"
-          ? [
-              "all",
-              ["!=", ["get", "age"], null],
-              [">=", ["get", "age"], 45],
-              ["<", ["get", "age"], 50],
-            ]
-          : ["literal", mode === "all"];
+        ? [">", ["get", mode], 0]
+        : mode === "old"
+          ? ["all", ["!=", ["get", "age"], null], [">=", ["get", "age"], 50]]
+          : mode === "near"
+            ? [
+                "all",
+                ["!=", ["get", "age"], null],
+                [">=", ["get", "age"], 45],
+                ["<", ["get", "age"], 50],
+              ]
+            : ["literal", mode === "all"];
   const colors = {
     notices: "#526a74",
     repair: "#f18277",
@@ -92,7 +93,10 @@ export function mountBuildingRegistry(
   map: Map,
   status: (s: string) => void,
   select: (p: BuildingInfo | null) => void,
+  districtName?: string,
+  language: Language = "zh",
 ) {
+  const say = (zh: string, en: string) => status(language === "en" ? en : zh);
   map.addSource("registry", {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
@@ -148,18 +152,17 @@ export function mountBuildingRegistry(
   });
   for (const l of map.getStyle().layers)
     if (l.type === "symbol") map.moveLayer(l.id);
-  highlightBuildings(map, "notices");
+  highlightBuildings(map, districtName ? "repair" : "notices");
   let controller: AbortController | undefined;
   let disposed = false;
   let selected: number | string | undefined;
   let loadedBounds: number[] | undefined;
-  let total = 0;
   let loadedProfile: "detail" | "overview" | undefined;
   let lastZoom = map.getZoom();
   const showOfficial = (visible: boolean) => {
     for (const id of ids)
       map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-    setBasicBuildingsVisible(map, !visible);
+    setBasicBuildingsVisible(map, districtName ? false : !visible);
   };
   const update = async () => {
     const zoom = map.getZoom();
@@ -168,10 +171,9 @@ export function mountBuildingRegistry(
     if (zoom < 13.25) {
       controller?.abort();
       showOfficial(false);
-      status(
-        loadedBounds && zoom >= 12
-          ? "保留已載入區域的關注輪廓；放大後可補載新區域。"
-          : "放大至縮放 13.25+ 可載入樓宇關注標色；15+ 可查看完整官方輪廓。",
+      say(
+        "放大後可查看紅色樓宇輪廓。",
+        "Zoom in to see red building footprints.",
       );
       return;
     }
@@ -182,13 +184,11 @@ export function mountBuildingRegistry(
     // Zooming out keeps the already loaded colored subset. Fetching every newly
     // visible polygon at a wider zoom would defeat the lightweight overview.
     if (profile === "overview" && zoomedOut && !loadedBounds && controller) {
-      status("縮遠保留正在載入的關注樓宇；普通建築維持精簡。");
+      say("正在載入紅色樓宇…", "Loading red buildings…");
       return;
     }
     if (profile === "overview" && loadedBounds && zoomedOut) {
-      status(
-        "縮遠保留已載入區域的關注輪廓；普通建築維持精簡。",
-      );
+      say("保留已載入區域的紅色樓宇。", "Keeping loaded red buildings.");
       return;
     }
     controller?.abort();
@@ -202,10 +202,9 @@ export function mountBuildingRegistry(
       raw[3] <= loadedBounds[3]
     ) {
       showOfficial(profile === "detail");
-      status(
-        profile === "detail"
-          ? `已載入 ${total.toLocaleString()} 個官方建築輪廓（視野及緩衝區）`
-          : "已載入官方關注資料；按篩選顯示，普通建築維持精簡。",
+      say(
+        "此區紅色樓宇輪廓已載入。",
+        "Red building shapes loaded for this district.",
       );
       return;
     }
@@ -216,27 +215,32 @@ export function mountBuildingRegistry(
       Math.min(22.6, raw[3] + 0.001),
     ];
     if (
-      box[2] - box[0] > (profile === "overview" ? 0.18 : 0.09) ||
-      box[3] - box[1] > (profile === "overview" ? 0.18 : 0.09) ||
+      box[2] - box[0] >
+        (districtName || profile === "overview" ? 0.18 : 0.09) ||
+      box[3] - box[1] >
+        (districtName || profile === "overview" ? 0.18 : 0.09) ||
       box[0] >= box[2] ||
       box[1] >= box[3]
     ) {
       showOfficial(false);
-      status("視野太廣或超出香港；請放大或降低傾斜角度以查詢官方樓宇。");
+      say(
+        "視野太廣；請放大查看樓宇。",
+        "The view is too wide; zoom in to see buildings.",
+      );
       return;
     }
     controller = new AbortController();
     const current = controller;
-    status(
-      profile === "overview"
-        ? "正在載入視野內的關注樓宇輪廓…"
-        : "正在載入視野內官方建築輪廓與樓宇紀錄…",
-    );
+    say("正在載入視野內的紅色樓宇…", "Loading red buildings in this view…");
     try {
       const response = await fetch(
         "/api/buildings?bbox=" +
           box.map((n) => n.toFixed(6)).join(",") +
-          (profile === "overview" ? "&only=highlights" : ""),
+          (districtName
+            ? `&only=repair&district=${encodeURIComponent(districtName)}`
+            : profile === "overview"
+              ? "&only=highlights"
+              : ""),
         { signal: current.signal },
       );
       if (!response.ok) throw new Error();
@@ -245,22 +249,17 @@ export function mountBuildingRegistry(
       (map.getSource("registry") as GeoJSONSource).setData(data);
       loadedBounds = box;
       loadedProfile = profile;
-      total = data.features.length;
       showOfficial(profile === "detail");
-      status(
-        profile === "detail"
-          ? `已載入 ${total.toLocaleString()} 個官方建築輪廓 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`
-          : `官方關注資料已載入，按篩選顯示 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`,
+      say(
+        `此區紅色樓宇輪廓已載入 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`,
+        `Red building shapes loaded for this district · Data fetched ${data.metadata.fetchedAt.slice(0, 10)}`,
       );
     } catch {
       if (!disposed && !current.signal.aborted) {
         showOfficial(false);
-        status(
-          profile === "overview"
-            ? loadedBounds
-              ? "未能擴展關注範圍；仍顯示已載入區域的標色。"
-              : "關注輪廓載入失敗；普通建築仍會顯示。移動地圖可重試。"
-            : "官方資料載入失敗；暫顯示 OSM。移動地圖可重試。",
+        say(
+          "樓宇資料載入失敗；移動地圖可重試。",
+          "Building data could not load; move the map to retry.",
         );
       }
     }
