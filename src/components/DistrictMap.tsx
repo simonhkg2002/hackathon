@@ -77,7 +77,7 @@ export function DistrictMap() {
       zoom: 15.2,
       pitch: 35,
       bearing: 0,
-      duration: reducedMotion ? 0 : 1100,
+      duration: reducedMotion ? 0 : 550,
     });
   }, []);
 
@@ -161,10 +161,11 @@ export function DistrictMap() {
       map,
       setRegistryStatus,
       setBuilding,
-      selectedDistrict.name,
+      selectedDistrict,
       language,
+      districtData?.fetchedAt,
     );
-  }, [ready, selectedDistrict, identifyEnabled, language]);
+  }, [ready, selectedDistrict, identifyEnabled, language, districtData]);
 
   useEffect(() => {
     const map = mapRef.current;

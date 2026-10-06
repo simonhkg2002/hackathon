@@ -2,26 +2,26 @@
 
 ## 已接入
 
-| 資料 | 官方來源 | 用途與限制 |
-|---|---|---|
-| 建築輪廓、高度、層數、名稱 | [地政總署 Building](https://portal.csdi.gov.hk/csdi-webpage/dataset/landsd_rcd_1637211194312_35158) | 只取 Active；按視野分頁讀取，不按高度刪掉小型建築。輪廓包括塔樓、平台及其他結構，輪廓數不等於大廈數。 |
-| 入伙紙日期、編號及用途 | 同一資料集的 BuildingRelateOPStructure、OPStructure、OP | 沿官方 CSUID 關聯鏈配對。樓齡按入伙紙日期計算，並非結構實際建成年份鑑定。多個日期時不猜單一年份；沒有日期便顯示未能確定。 |
-| 曾發出的強制驗樓通知 | [屋宇署 MBIS](https://data.gov.hk/en-data/dataset/hk-bd-opendata-mbis-s30b-notice-1) | 2023-05 起累計發出紀錄；以 CSV／服務內明確的 CSUID 配對。 |
-| 曾發出的修葺令 | [屋宇署 S26](https://data.gov.hk/en-data/dataset/hk-bd-opendata-s26-order-1) | 同上，不能稱為尚未遵從的命令或正在施工。多個 CSUID 可能共享同一樓座通知，不能把地圖輪廓數或各輪廓通知相加當全港總數。 |
-| 已遵從／撤銷／被取代的驗樓通知 | [屋宇署 MBIS 處理紀錄](https://data.gov.hk/en-data/dataset/hk-bd-opendata-mbis-s30b-notice-2) | 2024-05 起累計，另列於資訊卡，不與發出量相減。 |
-| 已遵從／撤銷／被取代的修葺令 | [屋宇署 S26 處理紀錄](https://data.gov.hk/en-data/dataset/hk-bd-opendata-s26-order-2) | 同上。 |
+| 資料                           | 官方來源                                                                                            | 用途與限制                                                                                                                |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 建築輪廓、高度、層數、名稱     | [地政總署 Building](https://portal.csdi.gov.hk/csdi-webpage/dataset/landsd_rcd_1637211194312_35158) | 只取 Active；按視野分頁讀取，不按高度刪掉小型建築。輪廓包括塔樓、平台及其他結構，輪廓數不等於大廈數。                     |
+| 入伙紙日期、編號及用途         | 同一資料集的 BuildingRelateOPStructure、OPStructure、OP                                             | 沿官方 CSUID 關聯鏈配對。樓齡按入伙紙日期計算，並非結構實際建成年份鑑定。多個日期時不猜單一年份；沒有日期便顯示未能確定。 |
+| 曾發出的強制驗樓通知           | [屋宇署 MBIS](https://data.gov.hk/en-data/dataset/hk-bd-opendata-mbis-s30b-notice-1)                | 2023-05 起累計發出紀錄；以 CSV／服務內明確的 CSUID 配對。                                                                 |
+| 曾發出的修葺令                 | [屋宇署 S26](https://data.gov.hk/en-data/dataset/hk-bd-opendata-s26-order-1)                        | 同上，不能稱為尚未遵從的命令或正在施工。多個 CSUID 可能共享同一樓座通知，不能把地圖輪廓數或各輪廓通知相加當全港總數。     |
+| 已遵從／撤銷／被取代的驗樓通知 | [屋宇署 MBIS 處理紀錄](https://data.gov.hk/en-data/dataset/hk-bd-opendata-mbis-s30b-notice-2)       | 2024-05 起累計，另列於資訊卡，不與發出量相減。                                                                            |
+| 已遵從／撤銷／被取代的修葺令   | [屋宇署 S26 處理紀錄](https://data.gov.hk/en-data/dataset/hk-bd-opendata-s26-order-2)               | 同上。                                                                                                                    |
 
 ## 18 區修葺令排名
 
 截至 2026-10-06 擷取的資料，**油尖旺區最多：347 份，涉及 269 個樓座**，佔全港 1,787 份中的 19.4%。其後排名：
 
-| 地區 | 累計修葺令 | 涉及樓座 |
-|---|---:|---:|
-| 油尖旺區 | 347 | 269 |
-| 東區 | 187 | 136 |
-| 深水埗區 | 164 | 132 |
-| 荃灣區 | 163 | 89 |
-| 中西區 | 162 | 148 |
+| 地區     | 累計修葺令 | 涉及樓座 |
+| -------- | ---------: | -------: |
+| 油尖旺區 |        347 |      269 |
+| 東區     |        187 |      136 |
+| 深水埗區 |        164 |      132 |
+| 荃灣區   |        163 |       89 |
+| 中西區   |        162 |      148 |
 
 統計使用屋宇署 S26 資料中每個 `BLOCK_ID_EN` 的 `Cum_s26Orders_Issued_EN`，以經緯度落入[民政事務總署 18 區分界](https://data.gov.hk/tc-data/dataset/hk-had-json1-hong-kong-administrative-boundaries/resource/46448a93-3343-4e30-ae37-b0e8c4f83bf7)歸區；不按 CSUID 或 3D 輪廓重複計數。1,319 個樓座全部歸區，沒有未配對座標。完整 18 區排名、兩個來源及擷取時間保存在 [`data/district-repair-stats.json`](../data/district-repair-stats.json)。`npm run data:refresh` 會一併更新。
 
@@ -52,6 +52,6 @@ npm run data:refresh
 
 需要 Python 3，使用標準函式庫，從官方公開端點取得資料，不需要 API key。刷新會完整分頁讀取關聯、通知及 18 區邊界，並更新 `data/building-registry.json` 和 `data/district-repair-stats.json`。樓宇關聯與逐座座標保留在伺服器；瀏覽器只取得地區摘要及所選視野的樓宇。刷新後伺服器會在下一次查詢時讀入新快照；重新整理地圖即可看到新資料。
 
-部署須包含 `data/`、`server/` 及 `dist/`。以 `npm run build && npm start` 執行；純靜態部署不能提供 `/api/districts`、`/api/buildings`。本應用已移除精細 3D Spatial Data 模型，無需其 API key。
+部署須包含 `data/`、`server/` 及 `dist/`。以 `npm run build && npm start` 執行；純靜態部署不能提供 `/api/districts`、`/api/buildings`。修葺令樓宇輪廓會在更新資料時預先整理到 `public/repair-geometries/`，建置時一併複製到 `dist/`，按區載入無需即時等待政府幾何查詢。本應用已移除精細 3D Spatial Data 模型，無需其 API key。
 
 畫面顯示的是**擷取日期**，不等於官方資料的更新日期。修葺令／驗樓官方 LastUpdate 保存在快照 `updates`，入伙紙資料並非即時更新。建議每月手動刷新，未啟用自動排程。

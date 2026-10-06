@@ -7,6 +7,13 @@ export interface DistrictStat {
   bbox: [number, number, number, number];
 }
 
+export function districtSlug(nameEn: string) {
+  return nameEn
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export interface DistrictData {
   fetchedAt: string;
   repairLastUpdate: string;

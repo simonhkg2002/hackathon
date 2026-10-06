@@ -6,6 +6,7 @@ import type {
   MapMouseEvent,
 } from "maplibre-gl";
 import { setBasicBuildingsVisible } from "./buildings";
+import { districtSlug, type DistrictStat } from "./districts";
 import type { Language } from "../i18n";
 export type BuildingInfo = {
   noticeUpdated?: string;
@@ -93,15 +94,17 @@ export function mountBuildingRegistry(
   map: Map,
   status: (s: string) => void,
   select: (p: BuildingInfo | null) => void,
-  districtName?: string,
+  district?: DistrictStat,
   language: Language = "zh",
+  districtVersion?: string,
 ) {
+  const districtName = district?.name;
   const say = (zh: string, en: string) => status(language === "en" ? en : zh);
   map.addSource("registry", {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
     maxzoom: 22,
-    tolerance: 0,
+    tolerance: 0.35,
     attribution: "樓宇資料 © 地政總署、屋宇署",
   });
   map.addLayer({
@@ -159,6 +162,7 @@ export function mountBuildingRegistry(
   let loadedBounds: number[] | undefined;
   let loadedProfile: "detail" | "overview" | undefined;
   let lastZoom = map.getZoom();
+  let districtLoaded = false;
   const showOfficial = (visible: boolean) => {
     for (const id of ids)
       map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
@@ -166,6 +170,10 @@ export function mountBuildingRegistry(
   };
   const update = async () => {
     const zoom = map.getZoom();
+    if (district) {
+      showOfficial(districtLoaded && zoom >= 15);
+      return;
+    }
     const zoomedOut = zoom < lastZoom - 0.05;
     lastZoom = zoom;
     if (zoom < 13.25) {
@@ -291,6 +299,34 @@ export function mountBuildingRegistry(
   cameraGuard();
   map.on("moveend", update);
   map.on("click", click);
+  if (district) {
+    showOfficial(false);
+    controller = new AbortController();
+    const asset = `/repair-geometries/${districtSlug(district.nameEn)}.json?v=${encodeURIComponent(districtVersion || "1")}`;
+    say("正在載入此區紅色樓宇…", "Loading red buildings for this district…");
+    void fetch(asset, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("District geometry unavailable");
+        return response.json();
+      })
+      .then((data) => {
+        if (disposed || controller?.signal.aborted) return;
+        (map.getSource("registry") as GeoJSONSource).setData(data);
+        districtLoaded = true;
+        showOfficial(map.getZoom() >= 15);
+        say(
+          `此區紅色樓宇輪廓已載入 · 資料擷取 ${data.metadata.fetchedAt.slice(0, 10)}`,
+          `Red building shapes loaded for this district · Data fetched ${data.metadata.fetchedAt.slice(0, 10)}`,
+        );
+      })
+      .catch(() => {
+        if (!disposed && !controller?.signal.aborted)
+          say(
+            "樓宇資料載入失敗；請重新選擇地區。",
+            "Building data could not load; select the district again.",
+          );
+      });
+  }
   void update();
   return () => {
     disposed = true;

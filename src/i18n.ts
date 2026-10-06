@@ -10,7 +10,7 @@ export const copy = {
     districtSource: "屋宇署資料 · 18 區界線由民政事務總署提供",
     districtListHint: "地圖會隱藏重疊標記；完整 18 區可在清單選擇。",
     back: "返回全港",
-    currentView: "地圖按目前視野載入樓宇；移動或放大可查看同區其他位置。",
+    currentView: "已載入此區紅色樓宇；移動或放大可查看其他街道。",
     noDistrictRecords: "此資料集沒有配對的修葺令樓座。",
     buildingInfo: "樓宇資料",
     viewDetails: "點選紅色樓宇查看資料",
@@ -74,7 +74,7 @@ export const copy = {
       "Overlapping map badges are hidden; all 18 districts remain in the list.",
     back: "All districts",
     currentView:
-      "Buildings load for the current map view. Pan or zoom to explore more of this district.",
+      "Red buildings for this district are loaded. Pan or zoom to explore more streets.",
     noDistrictRecords: "No matched repair-order buildings in this dataset.",
     buildingInfo: "Building details",
     viewDetails: "Select a red building for details",
