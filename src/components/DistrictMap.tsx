@@ -22,6 +22,7 @@ import {
 import { identify } from "../services/identify";
 import { BuildingPanel } from "./BuildingPanel";
 import { AccessCodeDialog } from "./AccessCodeDialog";
+import { LayerTwoView } from "./LayerTwoView";
 import { IdentifyPanel, type IdentifyState } from "./IdentifyPanel";
 
 type MapError = "mapStartError" | "mapError" | "mapSlow" | "sourceError";
@@ -40,6 +41,7 @@ export function DistrictMap() {
     null,
   );
   const [building, setBuilding] = useState<BuildingInfo | null>(null);
+  const [showLayerTwo, setShowLayerTwo] = useState(false);
   const [registryStatus, setRegistryStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<MapError | null>(null);
@@ -69,6 +71,7 @@ export function DistrictMap() {
     const map = mapRef.current;
     setSelectedDistrict(district);
     setBuilding(null);
+    setShowLayerTwo(false);
     setSelection(null);
     setRegistryStatus("");
     if (!map) return;
@@ -91,6 +94,7 @@ export function DistrictMap() {
     if (!district) return;
     setSelectedDistrict(district);
     setBuilding(null);
+    setShowLayerTwo(false);
     setSelection(null);
     setRegistryStatus("");
     mapRef.current?.flyTo({
@@ -192,6 +196,7 @@ export function DistrictMap() {
   useEffect(() => {
     const map = mapRef.current;
     setBuilding(null);
+    setShowLayerTwo(false);
     if (!map || !ready || !selectedDistrict || identifyEnabled) return;
     return mountBuildingRegistry(
       map,
@@ -330,6 +335,7 @@ export function DistrictMap() {
   const resetCamera = () => {
     setSelectedDistrict(null);
     setBuilding(null);
+    setShowLayerTwo(false);
     setRegistryStatus("");
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -483,17 +489,30 @@ export function DistrictMap() {
           {t.districtSource}
         </p>
       </section>
-      {building && !identifyEnabled && (
+      {building && !identifyEnabled && !showLayerTwo && (
         <BuildingPanel
           building={building}
           language={language}
           onClose={() => setBuilding(null)}
         />
       )}
-      {building && !identifyEnabled && isDemoBuilding(building) && (
-        <AccessCodeDialog
+      {building &&
+        !identifyEnabled &&
+        !showLayerTwo &&
+        isDemoBuilding(building) && (
+          <AccessCodeDialog
+            language={language}
+            onClose={() => setBuilding(null)}
+            onContinue={() => setShowLayerTwo(true)}
+          />
+        )}
+      {showLayerTwo && building && isDemoBuilding(building) && (
+        <LayerTwoView
           language={language}
-          onClose={() => setBuilding(null)}
+          onClose={() => {
+            setShowLayerTwo(false);
+            setBuilding(null);
+          }}
         />
       )}
       {selection && (

@@ -62,13 +62,15 @@ export const copy = {
     close: "關閉",
     demoBuilding: "屯門區 · 新屯門中心第１座",
     findDemoBuilding: "前往圖則示範 · 新屯門中心第１座",
-    accessTitle: "輸入存取碼",
-    accessHint: "請輸入此樓宇的 6 位數存取碼。",
-    accessLabel: "存取碼",
-    accessDigits: "只接受 6 位數字。",
+    accessTitle: "示範存取碼",
+    accessHint:
+      "示範碼已預設為 000000。按繼續即可查看第二層公開圖則；目前沒有身份驗證。",
     accessContinue: "繼續",
-    accessPending: "驗證功能尚未設定；目前不會開放下一層內容。",
-    structurePreview: "查看公開參考平面圖（非核准圖則）",
+    layerTwoEyebrow: "第二層 · 公開圖則示範",
+    backToMap: "返回地圖",
+    layerTwoPublicNotice:
+      "這是公開參考圖則示範。000000 不是保安憑證，任何人都可進入；沒有住客資料、用電或用水紀錄。",
+    floorPlanAlt: "新屯門中心第１座 1–43 樓的第三方參考平面圖",
     floorPlanTitle: "新屯門中心第１座 · 公開參考平面圖",
     floorPlanCaution:
       "1–43 樓參考圖；同座其他樓層另有圖則。此圖由第三方提供，不是屋宇署核准圖則，亦不能證明目前室內格局。",
@@ -145,14 +147,16 @@ export const copy = {
     close: "Close",
     demoBuilding: "Tuen Mun District · Sun Tuen Mun Centre Block 1",
     findDemoBuilding: "Find floor-plan demo · Sun Tuen Mun Centre Block 1",
-    accessTitle: "Enter access code",
-    accessHint: "Enter the six-digit access code for this building.",
-    accessLabel: "Access code",
-    accessDigits: "Six digits only.",
+    accessTitle: "Demo access code",
+    accessHint:
+      "The demo code is preset to 000000. Continue to the public floor-plan layer; no identity check is performed.",
     accessContinue: "Continue",
-    accessPending:
-      "Verification is not configured yet; the next layer remains locked.",
-    structurePreview: "View public reference floor plans (not approved plans)",
+    layerTwoEyebrow: "Layer two · public floor-plan demo",
+    backToMap: "Back to map",
+    layerTwoPublicNotice:
+      "This is a public reference-plan demo. 000000 is not a security credential and anyone can enter. No resident, electricity or water-usage data is available here.",
+    floorPlanAlt:
+      "Third-party reference plan for Sun Tuen Mun Centre Block 1, floors 1–43",
     floorPlanTitle: "Sun Tuen Mun Centre Block 1 · public reference plan",
     floorPlanCaution:
       "Reference for floors 1–43; other floor variants are listed by the source. This third-party plan is not a Buildings Department approved plan and may not reflect the present interior.",
