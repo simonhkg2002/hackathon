@@ -1,3 +1,4 @@
+import { setBasicBuildingsVisible } from "./buildings";
 import { ArchitecturalScenegraphLayer } from "./ArchitecturalScenegraphLayer";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { Tile3DLayer } from "@deck.gl/geo-layers";
@@ -21,18 +22,11 @@ export function mountOfficialModels(
   let settledSince = 0;
   let reported = false;
   const paths = ["3dsd/WGS84/building", "3dsd/WGS84/infrastructure"];
-  const setBasic = (visible: boolean) => {
-    if (map.getLayer("hk-buildings-3d"))
-      map.setLayoutProperty(
-        "hk-buildings-3d",
-        "visibility",
-        visible ? "visible" : "none",
-      );
-  };
+  const setBasic = (visible: boolean) => setBasicBuildingsVisible(map, visible);
   if (mode === "basic") {
     disableTerrain(map);
     setBasic(true);
-    onStatus("基本建築圖層");
+    onStatus("依縮放顯示建築 · 遠看輪廓，近看立體");
     return () => {};
   }
   onStatus("正在載入地政總署 3D 模型…");

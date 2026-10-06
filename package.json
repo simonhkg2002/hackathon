@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "start": "node --env-file-if-exists=.env.local server/index.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "data:refresh": "python3 scripts/update-buildings.py"
   },
   "dependencies": {
     "@deck.gl/core": "^9.4.0",

@@ -1,6 +1,6 @@
 # Hong Kong 3D Map
 
-A minimal full-window React + TypeScript map, built with Vite, MapLibre GL JS and Tailwind CSS. The default camera looks across Victoria Harbour at a 58° pitch. OpenFreeMap's dark vector style supplies land, coastline, water, roads and labels from OpenStreetMap-compatible data.
+A minimal full-window React + TypeScript map, built with Vite, MapLibre GL JS and Tailwind CSS. The default camera looks across Victoria Harbour at a 45° pitch. OpenFreeMap's dark vector style supplies land, coastline, water, roads and labels from OpenStreetMap-compatible data.
 
 ## Run locally
 
@@ -38,7 +38,7 @@ The default style is `https://tiles.openfreemap.org/styles/dark`; no token is ne
 
 ## Building heights
 
-The extrusion layer uses the provider's `render_height` and `render_min_height` values directly, without exaggeration or generated skyscrapers. Missing or nonnumeric heights resolve to zero, leaving those footprints flat. OpenMapTiles can derive render heights from OSM levels or provider defaults when surveyed heights are unavailable, so these values are source-based, not a guarantee of surveyed accuracy. Coverage varies by location and zoom. Buildings appear from zoom 13, below text labels. The basic mode uses a flat ground plane. Spatial mode adds elevation terrain at its true scale.
+The extrusion layer uses the provider's `render_height` and `render_min_height` values directly, without exaggeration or generated skyscrapers. Missing or nonnumeric heights resolve to zero, leaving those footprints flat. OpenMapTiles can derive render heights from OSM levels or provider defaults when surveyed heights are unavailable, so these values are source-based, not a guarantee of surveyed accuracy. Coverage varies by location and zoom. Buildings are shown by zoom tier, above roads and below labels. The basic mode uses a flat ground plane. Spatial mode adds elevation terrain at its true scale.
 
 ## Structure
 
@@ -113,3 +113,26 @@ Spatial 模式啟用 MapLibre `raster-dem` Terrarium 地形及 hillshade，倍�
 DEM 不是地政總署的精細地盤地形，來源解析度、年代及垂直基準可能與建築資料有差別。山坡整體會呈現，但個別地台、擋土牆、山路與建築底座仍可能有局部間隙／穿插；不以任意移動整幢建築掩蓋差異。若需要精確接地，下一步需換入官方精細 DTM 並確認高程基準。
 
 `src/map/deckCompatibility.ts` 隔離了 deck.gl 9.4 對舊 MapLibre `transform` 路徑的相容處理，讀取 MapLibre 6 的即時渲染相機。已固定 MapLibre 6.11.2；升級任一渲染套件時需重新驗證山區平移、縮放和模式切換。
+
+## 日常瀏覽的顯示取捨
+
+預設為「日常瀏覽 · 輕量建築」，沿用同一組向量圖磚，不下載官方 3D Tiles，也不預先載入 deck.gl。需要原始精細建築與山體時，手動選擇「精細模型 · 3D Spatial Data」。切回日常模式會釋放精細模型並恢復輪廓與分級建築。
+
+| 視距（zoom） | 建築顯示                                  |
+| ------------ | ----------------------------------------- |
+| 12–13.5      | 淡色平面輪廓，保留街廓                    |
+| 13.25–15.5    | 輪廓 + 來源高度至少 60 m 的高樓           |
+| 15.5–16.5    | 輪廓 + 來源高度至少 20 m 的建築           |
+| 16.5 以上    | 所有有高度資料且未標記 hide_3d 的立體建築 |
+
+高度缺失仍保留平面輪廓，不臆造樓高。高樓篩選只是視覺層級，不代表官方地標分類。三段立體圖層的 zoom 範圍不重疊，不重複畫同一幢建築；切換門檻會出現更多建築。
+
+繪製順序修正為地表／建築輪廓 → 道路 → 不透明立體建築 → 地名。原本將建築插入第一個文字層前，但該文字層是水域標籤，後面仍有道路，造成覆蓋。預設 pitch 改為 45°，減少遮住街道；道路按幹道／支路降低對比，小街名稱與方向箭頭留待放大後顯示。`VITE_MAP_PITCH` 仍可覆蓋預設。
+
+篩選改善 GPU 繪製與視覺密度，不代表向量圖磚的下載量同比減少。真正減少首次載入的是精細模型按需下載：本次 production 主程式 gzip 約 406 KB，精細模型另約 352 KB（不含 MapLibre worker、底圖與模型資料），相比原本主程式約 758 KB。
+
+## 樓宇資料與標色
+
+日常瀏覽在縮放 13.25–15 時，只載入視野內有關注分類的官方樓宇彩色平面輪廓；普通建築維持精簡的 OSM 顯示。放大至縮放 15 後，會載入視野內完整官方建築輪廓。點選可查看名稱、樓齡（入伙紙日期）、高度、層數、用途及曾發出、已遵從／撤銷／被取代的驗樓／修葺令紀錄。左側可選擇關注類別。45–49 年為「接近 50 年」分組；灰色不代表安全或沒有維修需要。
+
+更新資料：`npm run data:refresh`（Python 3），完成後重新整理地圖。正式部署須帶同 `data/` 目錄。詳細配對方式、來源及「正在維修」資料限制，見 [樓宇資料說明](docs/BUILDING_DATA.zh-Hant.md)。

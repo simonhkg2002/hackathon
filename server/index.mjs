@@ -1,3 +1,4 @@
+import { buildingsMiddleware } from "./buildings.mjs";
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -16,35 +17,38 @@ const mime = {
 };
 const api = createLandsMiddleware(process.env);
 createServer((req, res) => {
-  void api(req, res, () => {
-    void (async () => {
-      try {
-        const pathname = decodeURIComponent(
-          new URL(req.url || "/", "http://localhost").pathname,
-        );
-        let file = resolve(root, "." + pathname);
-        if (file !== root && !file.startsWith(root + "/")) {
-          res.writeHead(403).end();
-          return;
-        }
+  void buildingsMiddleware(req, res, () => {
+    void api(req, res, () => {
+      void (async () => {
         try {
-          if (!(await stat(file)).isFile()) file = resolve(root, "index.html");
+          const pathname = decodeURIComponent(
+            new URL(req.url || "/", "http://localhost").pathname,
+          );
+          let file = resolve(root, "." + pathname);
+          if (file !== root && !file.startsWith(root + "/")) {
+            res.writeHead(403).end();
+            return;
+          }
+          try {
+            if (!(await stat(file)).isFile())
+              file = resolve(root, "index.html");
+          } catch {
+            file = resolve(root, "index.html");
+          }
+          await stat(file);
+          res.writeHead(200, {
+            "Content-Type": mime[extname(file)] || "application/octet-stream",
+          });
+          const stream = createReadStream(file);
+          stream.on("error", () => res.destroy());
+          stream.pipe(res);
         } catch {
-          file = resolve(root, "index.html");
+          res
+            .writeHead(500)
+            .end("Build the application with npm run build first.");
         }
-        await stat(file);
-        res.writeHead(200, {
-          "Content-Type": mime[extname(file)] || "application/octet-stream",
-        });
-        const stream = createReadStream(file);
-        stream.on("error", () => res.destroy());
-        stream.pipe(res);
-      } catch {
-        res
-          .writeHead(500)
-          .end("Build the application with npm run build first.");
-      }
-    })();
+      })();
+    });
   });
 }).listen(
   Number(process.env.PORT || 4173),

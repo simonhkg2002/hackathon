@@ -30,6 +30,6 @@ export const initialCamera: CameraOptions = {
     numberSetting(import.meta.env.VITE_MAP_LATITUDE, 22.289, -85, 85),
   ],
   zoom: numberSetting(import.meta.env.VITE_MAP_ZOOM, 14.4, 2, 20),
-  pitch: numberSetting(import.meta.env.VITE_MAP_PITCH, 58, 0, 75),
+  pitch: numberSetting(import.meta.env.VITE_MAP_PITCH, 45, 0, 75),
   bearing: numberSetting(import.meta.env.VITE_MAP_BEARING, -20, -180, 180),
 };
