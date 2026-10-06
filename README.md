@@ -81,4 +81,6 @@ Keep the map's built-in attribution visible. Map data and tile service terms app
 
 點選紅色樓宇可查看名稱、樓齡（入伙紙日期）、高度、層數、用途，以及曾發出和已遵從／撤銷／被取代的驗樓／修葺令紀錄。樓齡不代表樓宇不安全。完整資料來源及限制見 [樓宇資料說明](docs/BUILDING_DATA.zh-Hant.md)。
 
+離島區「海景大廈」（官方 CSUID `1816213942T20050430`）是第二層功能的唯一示範樓宇。點選它會出現六位數存取碼視窗；目前只檢查輸入格式，尚未設定驗證服務或開放下一層內容，也不會儲存或傳送輸入的數字。其他樓宇保持原有互動。
+
 更新資料：`npm run data:refresh`（Python 3），完成後重新整理地圖。正式部署須帶同 `data/` 目錄。

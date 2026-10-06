@@ -13,6 +13,7 @@ import {
 } from "../map/buildingRegistry";
 import { addBuildings } from "../map/buildings";
 import { initialCamera, mapConfig } from "../map/config";
+import { isSeaViewDemoBuilding } from "../map/demoBuilding";
 import {
   fetchDistricts,
   type DistrictData,
@@ -20,6 +21,7 @@ import {
 } from "../map/districts";
 import { identify } from "../services/identify";
 import { BuildingPanel } from "./BuildingPanel";
+import { AccessCodeDialog } from "./AccessCodeDialog";
 import { IdentifyPanel, type IdentifyState } from "./IdentifyPanel";
 
 type MapError = "mapStartError" | "mapError" | "mapSlow" | "sourceError";
@@ -441,6 +443,12 @@ export function DistrictMap() {
       {building && !identifyEnabled && (
         <BuildingPanel
           building={building}
+          language={language}
+          onClose={() => setBuilding(null)}
+        />
+      )}
+      {building && !identifyEnabled && isSeaViewDemoBuilding(building) && (
+        <AccessCodeDialog
           language={language}
           onClose={() => setBuilding(null)}
         />

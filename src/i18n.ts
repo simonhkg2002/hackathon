@@ -60,6 +60,13 @@ export const copy = {
     identifyDetails: "詳細資料",
     identifyFooter: "查詢所點選的地理位置，並非個別建築物件屬性。",
     close: "關閉",
+    demoBuilding: "離島區 · 海景大廈",
+    accessTitle: "輸入存取碼",
+    accessHint: "請輸入此樓宇的 6 位數存取碼。",
+    accessLabel: "存取碼",
+    accessDigits: "只接受 6 位數字。",
+    accessContinue: "繼續",
+    accessPending: "驗證功能尚未設定；目前不會開放下一層內容。",
   },
   en: {
     appTitle: "Hong Kong Building Map",
@@ -129,5 +136,13 @@ export const copy = {
     identifyFooter:
       "This queries the selected ground location, not an individual 3D object.",
     close: "Close",
+    demoBuilding: "Islands District · Sea View Building",
+    accessTitle: "Enter access code",
+    accessHint: "Enter the six-digit access code for this building.",
+    accessLabel: "Access code",
+    accessDigits: "Six digits only.",
+    accessContinue: "Continue",
+    accessPending:
+      "Verification is not configured yet; the next layer remains locked.",
   },
 } as const;
