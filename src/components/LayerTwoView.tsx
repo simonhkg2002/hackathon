@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { sampleTickets } from "../data/sampleTickets";
 import { copy, type Language } from "../i18n";
 import { DEMO_BUILDING_CSUID } from "../map/demoBuilding";
 import { publicFloorPlans } from "../map/floorPlans";
@@ -28,11 +29,19 @@ export function LayerTwoView({
   const plan = publicFloorPlans[DEMO_BUILDING_CSUID];
   const [view, setView] = useState<"3d" | "plan">("3d");
   const [floor, setFloor] = useState(1);
-  const [location, setLocation] = useState<TicketLocation>("unit");
+  const [location, setLocation] = useState<TicketLocation>("corridor");
   const [modelPoint, setModelPoint] = useState<ModelPoint | null>(null);
   const [tickets, setTickets] = useState<DemoTicket[]>([]);
   const [live, setLive] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const allTickets = useMemo(() => [...tickets, ...sampleTickets], [tickets]);
+  const floorCounts = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const ticket of allTickets)
+      counts.set(ticket.floor, (counts.get(ticket.floor) || 0) + 1);
+    return counts;
+  }, [allTickets]);
+  const selectedCount = floorCounts.get(floor) || 0;
   const imageUrl =
     floor === 44 ? plan.floor44ImageUrl || plan.imageUrl : plan.imageUrl;
 
@@ -97,15 +106,18 @@ export function LayerTwoView({
               setFloor(Number(e.target.value));
               setModelPoint(null);
             }}
-            className="rounded-lg border border-white/20 bg-[#101719] px-3 py-2 text-white"
+            className={`rounded-lg border bg-[#101719] px-3 py-2 ${selectedCount ? "border-rose-400 text-rose-200" : "border-white/20 text-white"}`}
           >
             {Array.from({ length: 44 }, (_, index) => index + 1).map(
               (number) => {
-                const count = tickets.filter(
-                  (ticket) => ticket.floor === number,
-                ).length;
+                const count = floorCounts.get(number) || 0;
                 return (
-                  <option key={number} value={number}>
+                  <option
+                    key={number}
+                    value={number}
+                    className={count ? "text-rose-600" : "text-white"}
+                  >
+                    {count ? "🔴 " : ""}
                     {number}
                     {t.floorSuffix}
                     {count ? ` · ${count}` : ""}
@@ -114,6 +126,7 @@ export function LayerTwoView({
               },
             )}
           </select>
+          <span className="text-xs text-rose-300">{t.floorIssueLegend}</span>
           <span className="text-xs text-slate-400">{t.floorModelNote}</span>
         </div>
         <div role="tablist" aria-label={t.layerTwoViews} className="flex gap-2">
@@ -151,7 +164,7 @@ export function LayerTwoView({
               onLocationChange={setLocation}
               modelPoint={modelPoint}
               onModelPointChange={setModelPoint}
-              tickets={tickets.filter((ticket) => ticket.floor === floor)}
+              tickets={allTickets.filter((ticket) => ticket.floor === floor)}
             />
           </Suspense>
         ) : (
@@ -192,7 +205,7 @@ export function LayerTwoView({
         <RepairTickets
           language={language}
           floor={floor}
-          tickets={tickets}
+          tickets={allTickets}
           live={live}
           loadError={loadError}
           location={location}

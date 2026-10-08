@@ -211,6 +211,7 @@ export function Structure3DView({
     {},
   );
   const selectedPointRef = useRef<THREE.Mesh | null>(null);
+  const sampleDefectRef = useRef<THREE.Mesh[]>([]);
   const [showCeiling, setShowCeiling] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [sceneError, setSceneError] = useState(false);
@@ -398,27 +399,28 @@ export function Structure3DView({
     scene.add(ceiling);
     ceilingRef.current = ceiling;
 
-    // A sample defect marker on the ceiling of an illustrative west-side unit.
+    // Fictional defect in the shared lift lobby, shown only for the floor 9 sample.
     const patchGeometry = new THREE.CircleGeometry(0.8, 32);
     geometries.push(patchGeometry);
     const patch = new THREE.Mesh(patchGeometry, issueMaterial);
     patch.rotation.x = -Math.PI / 2;
-    patch.position.set(-9.5, 2.84, -1);
+    patch.position.set(0, 2.84, -2.5);
     patch.userData.issue = true;
     scene.add(patch);
     const ringGeometry = new THREE.RingGeometry(0.92, 1.06, 32);
     geometries.push(ringGeometry);
     const ring = new THREE.Mesh(ringGeometry, ringMaterial);
     ring.rotation.x = -Math.PI / 2;
-    ring.position.set(-9.5, 2.86, -1);
+    ring.position.set(0, 2.86, -2.5);
     ring.userData.issue = true;
     scene.add(ring);
     const pinGeometry = new THREE.SphereGeometry(0.28, 20, 12);
     geometries.push(pinGeometry);
     const pin = new THREE.Mesh(pinGeometry, issueMaterial);
-    pin.position.set(-9.5, 3.3, -1);
+    pin.position.set(0, 3.3, -2.5);
     pin.userData.issue = true;
     scene.add(pin);
+    sampleDefectRef.current = [patch, ring, pin];
 
     const ticketPoints: Record<TicketLocation, [number, number, number]> = {
       unit: [-7.3, 2.1, 2.1],
@@ -426,7 +428,8 @@ export function Structure3DView({
       lift: [-1.1, 3.05, -0.9],
       stairs: [0.8, 2.25, 2.1],
       "wet-area": [4.1, 2.05, 5.2],
-      ceiling: [-8.6, 3.55, -1.0],
+      ceiling: [0, 3.55, -2.5],
+      facade: [11.4, 2.1, -1],
     };
     for (const [key, position] of Object.entries(ticketPoints) as [
       TicketLocation,
@@ -525,9 +528,12 @@ export function Structure3DView({
         onModelPointChange({ x: hitPoint.x, z: hitPoint.z });
         return;
       }
-      if (raycaster.intersectObjects([pin, ring, patch]).length) {
+      if (
+        pin.visible &&
+        raycaster.intersectObjects([pin, ring, patch]).length
+      ) {
         onLocationChange("ceiling");
-        onModelPointChange({ x: -9.5, z: -1 });
+        onModelPointChange({ x: 0, z: -2.5 });
         setIssueOpen(true);
         return;
       }
@@ -555,6 +561,7 @@ export function Structure3DView({
       renderRef.current = null;
       ticketMarkersRef.current = {};
       selectedPointRef.current = null;
+      sampleDefectRef.current = [];
     };
   }, [language, onLocationChange, onModelPointChange, t]);
 
@@ -564,6 +571,12 @@ export function Structure3DView({
       renderRef.current?.();
     }
   }, [showCeiling]);
+
+  useEffect(() => {
+    for (const marker of sampleDefectRef.current) marker.visible = floor === 9;
+    if (floor !== 9) setIssueOpen(false);
+    renderRef.current?.();
+  }, [floor, language]);
 
   useEffect(() => {
     for (const [key, marker] of Object.entries(ticketMarkersRef.current) as [
@@ -626,12 +639,12 @@ export function Structure3DView({
         <div className="grid grid-cols-2 gap-1.5 border-t border-white/10 pt-3 text-xs">
           {(
             [
-              "unit",
               "corridor",
               "lift",
               "stairs",
               "wet-area",
               "ceiling",
+              "facade",
             ] as TicketLocation[]
           ).map((key) => (
             <button
@@ -663,14 +676,16 @@ export function Structure3DView({
         >
           {t.structure3dReset}
         </button>
-        <button
-          type="button"
-          onClick={() => setIssueOpen(true)}
-          className="block w-full rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-3 text-left text-red-100 hover:bg-red-400/20"
-        >
-          ● {t.structure3dIssue}
-        </button>
-        {issueOpen && (
+        {floor === 9 && (
+          <button
+            type="button"
+            onClick={() => setIssueOpen(true)}
+            className="block w-full rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-3 text-left text-red-100 hover:bg-red-400/20"
+          >
+            ● {t.structure3dIssue}
+          </button>
+        )}
+        {floor === 9 && issueOpen && (
           <div className="rounded-lg border border-red-400/30 bg-[#2e2427] p-3 leading-6 text-slate-200">
             <div className="flex justify-between gap-2">
               <strong className="text-red-200">{t.structure3dIssue}</strong>

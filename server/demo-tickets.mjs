@@ -4,12 +4,12 @@ import { dirname, resolve } from "node:path";
 
 export const DEMO_BUILDING_CSUID = "1432326923T20050430";
 export const TICKET_LOCATIONS = [
-  "unit",
   "corridor",
   "lift",
   "stairs",
   "wet-area",
   "ceiling",
+  "facade",
 ];
 export const TICKET_CATEGORIES = [
   "ceiling",
@@ -17,6 +17,10 @@ export const TICKET_CATEGORIES = [
   "electrical",
   "concrete",
   "door",
+  "obstruction",
+  "fire-safety",
+  "lift",
+  "facade",
   "other",
 ];
 

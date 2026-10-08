@@ -1,9 +1,18 @@
 import { DEMO_BUILDING_CSUID } from "../map/demoBuilding";
 
 export type TicketLocation =
-  "unit" | "corridor" | "lift" | "stairs" | "wet-area" | "ceiling";
+  "unit" | "corridor" | "lift" | "stairs" | "wet-area" | "ceiling" | "facade";
 export type TicketCategory =
-  "ceiling" | "water" | "electrical" | "concrete" | "door" | "other";
+  | "ceiling"
+  | "water"
+  | "electrical"
+  | "concrete"
+  | "door"
+  | "obstruction"
+  | "fire-safety"
+  | "lift"
+  | "facade"
+  | "other";
 export type ModelPoint = { x: number; z: number };
 export type DemoTicket = {
   id: string;
@@ -12,18 +21,20 @@ export type DemoTicket = {
   location: TicketLocation;
   category: TicketCategory;
   description: string;
+  descriptionEn?: string;
+  sample?: true;
   modelPoint: ModelPoint | null;
   status: "new";
   createdAt: string;
 };
 
 export const ticketLocations: TicketLocation[] = [
-  "unit",
   "corridor",
   "lift",
   "stairs",
   "wet-area",
   "ceiling",
+  "facade",
 ];
 export const ticketCategories: TicketCategory[] = [
   "ceiling",
@@ -31,6 +42,10 @@ export const ticketCategories: TicketCategory[] = [
   "electrical",
   "concrete",
   "door",
+  "obstruction",
+  "fire-safety",
+  "lift",
+  "facade",
   "other",
 ];
 

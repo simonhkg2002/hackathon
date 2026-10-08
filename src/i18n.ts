@@ -74,6 +74,7 @@ export const copy = {
     floorSuffix: "樓",
     floorModelNote:
       "第 1 座的 1–44 樓為住宅樓層；未找到可核對的大堂圖則，故不顯示大堂模型。3D 模型為共用示意。",
+    floorIssueLegend: "🔴 有公共地方問題的樓層（包括模擬個案）",
     floorPlanAlt: "新屯門中心第１座 1–43 樓的第三方參考平面圖",
     floorPlanTitle: "新屯門中心第１座 · 公開參考平面圖",
     floorPlanCaution:
@@ -113,11 +114,12 @@ export const copy = {
       stairs: "樓梯",
       "wet-area": "濕區",
       ceiling: "天花",
+      facade: "外牆",
     },
-    ticketCountShort: "張本層回報",
+    ticketCountShort: "宗本層問題（含模擬）",
     ticketReportTitle: "住戶報修 · 示範 ticket",
     ticketPrivacy:
-      "公開示範，沒有住戶驗證。只描述問題，請勿輸入姓名、電話、門牌、單位號碼或可識別個人的內容。",
+      "公開示範，沒有住戶驗證。只回報樓宇或公共地方問題；請勿輸入姓名、電話、門牌、單位號碼或可識別個人的內容。",
     ticketLocation: "空間位置",
     ticketCategory: "問題類型",
     ticketDescription: "問題描述（10–500 字）",
@@ -130,7 +132,10 @@ export const copy = {
     ticketSubmit: "提交報修",
     ticketSubmitError: "提交失敗，請稍後重試。",
     ticketSuccess: "已建立示範 ticket，其他開啟本服務的分頁會同步看到。",
-    ticketListTitle: "本層回報",
+    ticketListTitle: "本層公共地方問題",
+    sampleTicketNote:
+      "藍色「模擬個案」並非此樓宇的實際事故；其他回報由使用者提交，亦未經核實。",
+    sampleTicketBadge: "模擬個案",
     ticketLive: "● 即時連線",
     ticketReconnecting: "○ 正在重新連線",
     ticketLoadError: "暫時無法載入回報，請檢查服務連線。",
@@ -219,6 +224,7 @@ export const copy = {
     floorSuffix: "F",
     floorModelNote:
       "Block 1 floors 1–44 are residential. No verifiable lobby plan was found, so the lobby is omitted. The 3D model is a shared concept.",
+    floorIssueLegend: "🔴 Floors with common-area issues (including samples)",
     floorPlanAlt:
       "Third-party reference plan for Sun Tuen Mun Centre Block 1, floors 1–43",
     floorPlanTitle: "Sun Tuen Mun Centre Block 1 · public reference plan",
@@ -262,11 +268,12 @@ export const copy = {
       stairs: "Stairs",
       "wet-area": "Wet area",
       ceiling: "Ceiling",
+      facade: "Façade",
     },
-    ticketCountShort: "tickets on this floor",
+    ticketCountShort: "issues on this floor (including samples)",
     ticketReportTitle: "Resident repair report · demo ticket",
     ticketPrivacy:
-      "Public demo without resident verification. Describe the issue only; do not enter names, phone numbers, addresses, unit numbers or identifying details.",
+      "Public demo without resident verification. Report building or common-area issues only; do not enter names, phone numbers, addresses, unit numbers or identifying details.",
     ticketLocation: "Location",
     ticketCategory: "Issue type",
     ticketDescription: "Description (10–500 characters)",
@@ -281,7 +288,10 @@ export const copy = {
     ticketSubmitError: "Submission failed. Please try again.",
     ticketSuccess:
       "Demo ticket created. Other tabs connected to this service will see it.",
-    ticketListTitle: "Reports on this floor",
+    ticketListTitle: "Common-area issues on this floor",
+    sampleTicketNote:
+      "Blue sample cases are fictional. Other user-submitted reports are also unverified.",
+    sampleTicketBadge: "Sample case",
     ticketLive: "● Live connection",
     ticketReconnecting: "○ Reconnecting",
     ticketLoadError: "Reports are unavailable. Check the service connection.",

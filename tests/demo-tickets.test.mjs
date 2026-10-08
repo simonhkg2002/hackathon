@@ -36,6 +36,19 @@ test("demo tickets validate floor and location, persist, and stream new reports"
     });
     assert.equal(invalid.status, 400);
 
+    const privateUnit = await fetch(`${base}/api/demo-tickets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        buildingCsuid: DEMO_BUILDING_CSUID,
+        floor: 12,
+        location: "unit",
+        category: "water",
+        description: "Leak inside a private flat",
+      }),
+    });
+    assert.equal(privateUnit.status, 400);
+
     const invalidPoint = await fetch(`${base}/api/demo-tickets`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -63,9 +76,9 @@ test("demo tickets validate floor and location, persist, and stream new reports"
       body: JSON.stringify({
         buildingCsuid: DEMO_BUILDING_CSUID,
         floor: 12,
-        location: "lift",
-        category: "ceiling",
-        description: "Loose ceiling plaster near the lift",
+        location: "corridor",
+        category: "obstruction",
+        description: "Boxes block the shared corridor near the lift",
         modelPoint: { x: -1.1, z: -0.9 },
       }),
     });

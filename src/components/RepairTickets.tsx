@@ -18,6 +18,7 @@ const locationNames: Record<Language, Record<TicketLocation, string>> = {
     stairs: "樓梯",
     "wet-area": "濕區／水管",
     ceiling: "天花",
+    facade: "外牆",
   },
   en: {
     unit: "Inside unit",
@@ -26,6 +27,7 @@ const locationNames: Record<Language, Record<TicketLocation, string>> = {
     stairs: "Stairs",
     "wet-area": "Wet area / plumbing",
     ceiling: "Ceiling",
+    facade: "Façade",
   },
 };
 const categoryNames: Record<Language, Record<TicketCategory, string>> = {
@@ -35,6 +37,10 @@ const categoryNames: Record<Language, Record<TicketCategory, string>> = {
     electrical: "電力設備",
     concrete: "混凝土／外牆",
     door: "門窗",
+    obstruction: "通道阻塞／雜物",
+    "fire-safety": "消防設備／逃生路線",
+    lift: "升降機",
+    facade: "外牆／飾面",
     other: "其他",
   },
   en: {
@@ -43,6 +49,10 @@ const categoryNames: Record<Language, Record<TicketCategory, string>> = {
     electrical: "Electrical",
     concrete: "Concrete / façade",
     door: "Door / window",
+    obstruction: "Obstruction / clutter",
+    "fire-safety": "Fire safety / escape route",
+    lift: "Lift",
+    facade: "Façade / finish",
     other: "Other",
   },
 };
@@ -214,6 +224,7 @@ export function RepairTickets({
             {live ? t.ticketLive : t.ticketReconnecting}
           </span>
         </div>
+        <p className="mt-2 text-xs text-slate-400">{t.sampleTicketNote}</p>
         {loadError && (
           <p role="alert" className="mt-3 text-amber-200">
             {t.ticketLoadError}
@@ -233,20 +244,26 @@ export function RepairTickets({
                     {categoryNames[language][ticket.category]} ·{" "}
                     {locationNames[language][ticket.location]}
                   </strong>
-                  <span className="text-xs text-amber-200">
-                    {t.ticketStatusNew}
+                  <span
+                    className={`text-xs ${ticket.sample ? "text-sky-200" : "text-amber-200"}`}
+                  >
+                    {ticket.sample ? t.sampleTicketBadge : t.ticketStatusNew}
                   </span>
                 </div>
                 <p className="mt-1 whitespace-pre-wrap break-words text-slate-300">
-                  {ticket.description}
+                  {language === "en" && ticket.sample
+                    ? ticket.descriptionEn
+                    : ticket.description}
                 </p>
-                <p className="mt-2 text-xs text-slate-500">
-                  {new Intl.DateTimeFormat(
-                    language === "en" ? "en-HK" : "zh-HK",
-                    { dateStyle: "short", timeStyle: "short" },
-                  ).format(new Date(ticket.createdAt))}{" "}
-                  · #{ticket.id.slice(0, 8)}
-                </p>
+                {!ticket.sample && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    {new Intl.DateTimeFormat(
+                      language === "en" ? "en-HK" : "zh-HK",
+                      { dateStyle: "short", timeStyle: "short" },
+                    ).format(new Date(ticket.createdAt))}{" "}
+                    · #{ticket.id.slice(0, 8)}
+                  </p>
+                )}
               </li>
             ))}
           </ol>

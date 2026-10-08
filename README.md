@@ -89,4 +89,6 @@ Keep the map's built-in attribution visible. Map data and tile service terms app
 
 第二層可選住宅 1–44 樓；因未找到可核對的大堂圖則，暫不顯示大堂模型。3D 空間標籤會顯示升降機、樓梯、走廊等用途。住戶可選樓層與空間用途，亦可點選 3D 示意樓面標記大概位置，再填寫問題描述建立**公開示範報修 ticket**。同一服務上的其他分頁會透過 SSE 即時收到更新，回報保存在伺服器的 `.local/demo-tickets.json`（可用 `DEMO_TICKETS_FILE` 改路徑，並已從 Git 排除）。目前沒有住戶驗證、管理員審核或結案權限，請勿輸入姓名、電話、單位號碼或其他個人資料；此流程尚不適合真實住戶報修。
 
+第二層預載 9 宗固定的**虛構公共地方個案**，分佈在 9 個住宅樓層；有問題的樓層在選單以紅點和件數標示。示範個案只在前端展示，不寫入住戶回報檔或即時事件串流。公共地方問題的更多分類見[問題目錄](docs/common-area-issue-catalog.md)。
+
 更新資料：`npm run data:refresh`（Python 3），完成後重新整理地圖。正式部署須帶同 `data/` 目錄。
