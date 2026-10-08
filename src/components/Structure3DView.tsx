@@ -29,30 +29,55 @@ const outline: Point[] = [
   [-12, 4],
 ];
 
+// Openings in core-facing partitions stand in for unit entrance doors.
 const interiorWalls: [Point, Point][] = [
   [
     [-3, -7],
+    [-3, -2.8],
+  ],
+  [
+    [-3, -1.7],
+    [-3, 1.7],
+  ],
+  [
+    [-3, 2.8],
     [-3, 7],
   ],
   [
     [3, -7],
+    [3, -2.8],
+  ],
+  [
+    [3, -1.7],
+    [3, 1.7],
+  ],
+  [
+    [3, 2.8],
     [3, 7],
   ],
   [
     [-3, -3],
+    [-0.6, -3],
+  ],
+  [
+    [0.6, -3],
     [3, -3],
   ],
   [
     [-3, 3],
+    [-0.6, 3],
+  ],
+  [
+    [0.6, 3],
     [3, 3],
   ],
   [
-    [-8, 0],
+    [-12, 0],
     [-3, 0],
   ],
   [
     [3, 0],
-    [8, 0],
+    [12, 0],
   ],
   [
     [-8, -4],
@@ -71,21 +96,88 @@ const interiorWalls: [Point, Point][] = [
     [8, 4],
   ],
   [
+    [-8, -7],
+    [-3, -7],
+  ],
+  [
+    [3, -7],
+    [8, -7],
+  ],
+  [
+    [-8, 7],
+    [-3, 7],
+  ],
+  [
+    [3, 7],
+    [8, 7],
+  ],
+  [
+    [-8, -4],
+    [-8, -2.8],
+  ],
+  [
+    [-8, -1.8],
+    [-8, 1.8],
+  ],
+  [
+    [-8, 2.8],
+    [-8, 4],
+  ],
+  [
+    [8, -4],
+    [8, -2.8],
+  ],
+  [
+    [8, -1.8],
+    [8, 1.8],
+  ],
+  [
+    [8, 2.8],
+    [8, 4],
+  ],
+  [
     [-5.4, -10],
-    [-5.4, -4],
+    [-5.4, -7],
   ],
   [
-    [5.4, -10],
-    [5.4, -4],
-  ],
-  [
-    [-5.4, 4],
+    [-5.4, 7],
     [-5.4, 10],
   ],
   [
-    [5.4, 4],
+    [5.4, -10],
+    [5.4, -7],
+  ],
+  [
+    [5.4, 7],
     [5.4, 10],
   ],
+  [
+    [-10, -4],
+    [-10, 0],
+  ],
+  [
+    [-10, 0],
+    [-10, 4],
+  ],
+  [
+    [10, -4],
+    [10, 0],
+  ],
+  [
+    [10, 0],
+    [10, 4],
+  ],
+];
+
+const unitFloors: [number, number, number, number][] = [
+  [-7.5, -2, 8.7, 3.7],
+  [-7.5, 2, 8.7, 3.7],
+  [7.5, -2, 8.7, 3.7],
+  [7.5, 2, 8.7, 3.7],
+  [-5.2, -7, 5.7, 5.7],
+  [5.2, -7, 5.7, 5.7],
+  [-5.2, 7, 5.7, 5.7],
+  [5.2, 7, 5.7, 5.7],
 ];
 
 export function Structure3DView({ language }: { language: Language }) {
@@ -94,7 +186,7 @@ export function Structure3DView({ language }: { language: Language }) {
   const ceilingRef = useRef<THREE.Group | null>(null);
   const resetRef = useRef<(() => void) | null>(null);
   const renderRef = useRef<(() => void) | null>(null);
-  const [showCeiling, setShowCeiling] = useState(true);
+  const [showCeiling, setShowCeiling] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [sceneError, setSceneError] = useState(false);
 
@@ -114,11 +206,11 @@ export function Structure3DView({ language }: { language: Language }) {
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 150);
-    camera.position.set(26, 26, 29);
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 150);
+    camera.position.set(19, 20, 22);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0, 0.6, 0);
-    controls.minDistance = 13;
+    controls.minDistance = 9;
     controls.maxDistance = 85;
     controls.maxPolarAngle = Math.PI * 0.49;
     controls.enableDamping = false;
@@ -149,10 +241,15 @@ export function Structure3DView({ language }: { language: Language }) {
       return m;
     };
     const floorMaterial = material(0xc8d9d7);
-    const wallMaterial = material(0x7fb2bb, 0.67);
-    const outerMaterial = material(0xbee6e5, 0.38);
+    const wallMaterial = material(0x7fb2bb, 0.84);
+    const outerMaterial = material(0xbee6e5, 0.5);
     const ceilingMaterial = material(0x8dc9ce, 0.32);
     const coreMaterial = material(0x547987, 0.7);
+    const unitMaterialA = material(0xe1d4bc);
+    const unitMaterialB = material(0xd5e4d6);
+    const wetAreaMaterial = material(0x89a9b7);
+    const liftMaterial = material(0x397c91, 0.9);
+    const stairMaterial = material(0xe2ad68);
     const issueMaterial = material(0xf35c4f);
     const ringMaterial = material(0xffc166);
 
@@ -171,11 +268,48 @@ export function Structure3DView({ language }: { language: Language }) {
     floor.position.y = -0.22;
     scene.add(floor);
 
+    const addBox = (
+      width: number,
+      height: number,
+      depth: number,
+      x: number,
+      y: number,
+      z: number,
+      source: THREE.Material,
+    ) => {
+      const geometry = new THREE.BoxGeometry(width, height, depth);
+      geometries.push(geometry);
+      const box = new THREE.Mesh(geometry, source);
+      box.position.set(x, y, z);
+      scene.add(box);
+      return box;
+    };
+    unitFloors.forEach(([x, z, width, depth], index) =>
+      addBox(
+        width,
+        0.025,
+        depth,
+        x,
+        0.025,
+        z,
+        index % 2 ? unitMaterialA : unitMaterialB,
+      ),
+    );
+    // Small wet-area tiles identify service rooms without claiming their real positions.
+    for (const x of [-4.2, 4.2]) {
+      for (const z of [-5.2, 5.2])
+        addBox(1.35, 0.035, 1.2, x, 0.065, z, wetAreaMaterial);
+    }
+    for (const x of [-4.15, 4.15]) {
+      for (const z of [-1.1, 1.1])
+        addBox(1.2, 0.035, 1, x, 0.065, z, wetAreaMaterial);
+    }
+
     const addWall = (
       [ax, az]: Point,
       [bx, bz]: Point,
       source: THREE.Material,
-      height = 2.75,
+      height = 1.65,
     ) => {
       const length = Math.hypot(bx - ax, bz - az);
       const geometry = new THREE.BoxGeometry(length, height, 0.14);
@@ -188,13 +322,28 @@ export function Structure3DView({ language }: { language: Language }) {
     outline.forEach((p, index) =>
       addWall(p, outline[(index + 1) % outline.length], outerMaterial),
     );
-    interiorWalls.forEach(([a, b]) => addWall(a, b, wallMaterial, 2.45));
+    interiorWalls.forEach(([a, b]) => addWall(a, b, wallMaterial, 1.4));
 
     const coreGeometry = new THREE.BoxGeometry(5.6, 0.08, 5.6);
     geometries.push(coreGeometry);
     const core = new THREE.Mesh(coreGeometry, coreMaterial);
     core.position.set(0, 0.06, 0);
     scene.add(core);
+
+    // Two lift shafts and a stepped stair bay make the central circulation legible.
+    addBox(1.35, 2.2, 1.65, -1.05, 1.15, -0.9, liftMaterial);
+    addBox(1.35, 2.2, 1.65, 1.05, 1.15, -0.9, liftMaterial);
+    for (let step = 0; step < 7; step++) {
+      addBox(
+        2.2,
+        0.13,
+        0.29,
+        0,
+        0.16 + step * 0.19,
+        0.65 + step * 0.28,
+        stairMaterial,
+      );
+    }
 
     const ceiling = new THREE.Group();
     const ceilingZones: [number, number, number, number][] = [
@@ -317,6 +466,20 @@ export function Structure3DView({ language }: { language: Language }) {
           {t.structure3dTitle}
         </h3>
         <p className="leading-6 text-slate-300">{t.structure3dExplanation}</p>
+        <div className="space-y-1.5 border-t border-white/10 pt-3 text-xs text-slate-300">
+          <p>
+            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#d5e4d6]" />
+            {t.structure3dUnits}
+          </p>
+          <p>
+            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#397c91]" />
+            {t.structure3dService}
+          </p>
+          <p>
+            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#e2ad68]" />
+            {t.structure3dStairs}
+          </p>
+        </div>
         <label className="flex items-center gap-2 text-slate-200">
           <input
             type="checkbox"

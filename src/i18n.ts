@@ -82,7 +82,10 @@ export const copy = {
     loading3d: "正在載入 3D 示意…",
     structure3dTitle: "樓層 3D 剖面示意",
     structure3dExplanation:
-      "以公開平面圖的中央核心和周邊單位概念建立。牆線、比例及層高未經測量，不能用作施工或安全判斷。",
+      "已加入單位房間分隔、門洞、濕區示意、中央走廊、升降機井及樓梯。牆身以剖切方式縮短，模型在畫面放大以方便觀察；各位置和尺寸未經測量，不能用作施工或安全判斷。",
+    structure3dUnits: "單位與房間",
+    structure3dService: "濕區／升降機",
+    structure3dStairs: "樓梯",
     structure3dCeiling: "顯示半透明天花",
     structure3dReset: "重設視角",
     structure3dControls: "拖曳旋轉 · 滾輪縮放 · 右鍵平移",
@@ -182,7 +185,10 @@ export const copy = {
     loading3d: "Loading 3D concept…",
     structure3dTitle: "3D floor cutaway concept",
     structure3dExplanation:
-      "A conceptual central core and surrounding units informed by the public plan. Walls, scale and floor height are unmeasured and must not guide construction or safety decisions.",
+      "The concept includes unit partitions, door openings, wet areas, a central corridor, lift shafts and stairs. Walls are cut down and the model is enlarged on screen for inspection; locations and dimensions are unmeasured and must not guide construction or safety decisions.",
+    structure3dUnits: "Units and rooms",
+    structure3dService: "Wet areas / lifts",
+    structure3dStairs: "Stairs",
     structure3dCeiling: "Show translucent ceilings",
     structure3dReset: "Reset camera",
     structure3dControls: "Drag to rotate · scroll to zoom · right-drag to pan",
