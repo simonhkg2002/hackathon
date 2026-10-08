@@ -1,7 +1,15 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { copy, type Language } from "../i18n";
 import { DEMO_BUILDING_CSUID } from "../map/demoBuilding";
 import { publicFloorPlans } from "../map/floorPlans";
+import {
+  fetchDemoTickets,
+  subscribeDemoTickets,
+  type DemoTicket,
+  type ModelPoint,
+  type TicketLocation,
+} from "../services/demoTickets";
+import { RepairTickets } from "./RepairTickets";
 
 const Structure3DView = lazy(() =>
   import("./Structure3DView").then((module) => ({
@@ -19,6 +27,33 @@ export function LayerTwoView({
   const t = copy[language];
   const plan = publicFloorPlans[DEMO_BUILDING_CSUID];
   const [view, setView] = useState<"3d" | "plan">("3d");
+  const [floor, setFloor] = useState(1);
+  const [location, setLocation] = useState<TicketLocation>("unit");
+  const [modelPoint, setModelPoint] = useState<ModelPoint | null>(null);
+  const [tickets, setTickets] = useState<DemoTicket[]>([]);
+  const [live, setLive] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const imageUrl =
+    floor === 44 ? plan.floor44ImageUrl || plan.imageUrl : plan.imageUrl;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchDemoTickets(controller.signal)
+      .then((items) => {
+        if (!controller.signal.aborted) setTickets(items);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setLoadError(true);
+      });
+    const unsubscribe = subscribeDemoTickets((items) => {
+      setTickets(items);
+      setLoadError(false);
+    }, setLive);
+    return () => {
+      controller.abort();
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <section
@@ -51,6 +86,36 @@ export function LayerTwoView({
         <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm leading-6 text-amber-100">
           {t.layerTwoPublicNotice}
         </div>
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-[#18272d] px-4 py-3 text-sm">
+          <label htmlFor="demo-floor" className="font-semibold text-teal-100">
+            {t.floorSelector}
+          </label>
+          <select
+            id="demo-floor"
+            value={floor}
+            onChange={(e) => {
+              setFloor(Number(e.target.value));
+              setModelPoint(null);
+            }}
+            className="rounded-lg border border-white/20 bg-[#101719] px-3 py-2 text-white"
+          >
+            {Array.from({ length: 44 }, (_, index) => index + 1).map(
+              (number) => {
+                const count = tickets.filter(
+                  (ticket) => ticket.floor === number,
+                ).length;
+                return (
+                  <option key={number} value={number}>
+                    {number}
+                    {t.floorSuffix}
+                    {count ? ` · ${count}` : ""}
+                  </option>
+                );
+              },
+            )}
+          </select>
+          <span className="text-xs text-slate-400">{t.floorModelNote}</span>
+        </div>
         <div role="tablist" aria-label={t.layerTwoViews} className="flex gap-2">
           <button
             type="button"
@@ -79,7 +144,15 @@ export function LayerTwoView({
               </p>
             }
           >
-            <Structure3DView language={language} />
+            <Structure3DView
+              language={language}
+              floor={floor}
+              location={location}
+              onLocationChange={setLocation}
+              modelPoint={modelPoint}
+              onModelPointChange={setModelPoint}
+              tickets={tickets.filter((ticket) => ticket.floor === floor)}
+            />
           </Suspense>
         ) : (
           <>
@@ -87,12 +160,12 @@ export function LayerTwoView({
               <h3 className="text-lg font-medium">{t.floorPlanTitle}</h3>
               <div className="flex gap-4 text-sm text-teal-300">
                 <a
-                  href={plan.imageUrl}
+                  href={imageUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="underline"
                 >
-                  {t.openFloorPlan}
+                  {floor === 44 ? t.openFloorPlan44 : t.openFloorPlan}
                 </a>
                 <a
                   href={plan.pageUrl}
@@ -106,16 +179,34 @@ export function LayerTwoView({
             </div>
             <div className="flex flex-1 items-center justify-center overflow-auto rounded-xl border border-white/10 bg-white p-3">
               <img
-                src={plan.imageUrl}
-                alt={t.floorPlanAlt}
+                src={imageUrl}
+                alt={floor === 44 ? t.floorPlan44Alt : t.floorPlanAlt}
                 className="max-h-[68dvh] max-w-full object-contain"
               />
             </div>
             <p className="text-xs leading-5 text-slate-400">
-              {t.floorPlanCaution}
+              {floor === 44 ? t.floorPlan44Caution : t.floorPlanCaution}
             </p>
           </>
         )}
+        <RepairTickets
+          language={language}
+          floor={floor}
+          tickets={tickets}
+          live={live}
+          loadError={loadError}
+          location={location}
+          onLocationChange={setLocation}
+          modelPoint={modelPoint}
+          onModelPointChange={setModelPoint}
+          onSubmitted={(ticket) =>
+            setTickets((current) =>
+              current.some((item) => item.id === ticket.id)
+                ? current
+                : [ticket, ...current],
+            )
+          }
+        />
       </div>
     </section>
   );

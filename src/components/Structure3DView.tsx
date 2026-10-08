@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { copy, type Language } from "../i18n";
+import type {
+  DemoTicket,
+  ModelPoint,
+  TicketLocation,
+} from "../services/demoTickets";
 
 type Point = [number, number];
 
@@ -180,12 +185,32 @@ const unitFloors: [number, number, number, number][] = [
   [5.2, 7, 5.7, 5.7],
 ];
 
-export function Structure3DView({ language }: { language: Language }) {
+export function Structure3DView({
+  language,
+  floor,
+  location,
+  onLocationChange,
+  modelPoint,
+  onModelPointChange,
+  tickets,
+}: {
+  language: Language;
+  floor: number;
+  location: TicketLocation;
+  onLocationChange: (location: TicketLocation) => void;
+  modelPoint: ModelPoint | null;
+  onModelPointChange: (point: ModelPoint | null) => void;
+  tickets: DemoTicket[];
+}) {
   const t = copy[language];
   const mountRef = useRef<HTMLDivElement>(null);
   const ceilingRef = useRef<THREE.Group | null>(null);
   const resetRef = useRef<(() => void) | null>(null);
   const renderRef = useRef<(() => void) | null>(null);
+  const ticketMarkersRef = useRef<Partial<Record<TicketLocation, THREE.Mesh>>>(
+    {},
+  );
+  const selectedPointRef = useRef<THREE.Mesh | null>(null);
   const [showCeiling, setShowCeiling] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [sceneError, setSceneError] = useState(false);
@@ -228,6 +253,7 @@ export function Structure3DView({ language }: { language: Language }) {
 
     const geometries: THREE.BufferGeometry[] = [];
     const materials: THREE.Material[] = [];
+    const textures: THREE.Texture[] = [];
     const material = (color: number, opacity = 1) => {
       const m = new THREE.MeshStandardMaterial({
         color,
@@ -252,6 +278,8 @@ export function Structure3DView({ language }: { language: Language }) {
     const stairMaterial = material(0xe2ad68);
     const issueMaterial = material(0xf35c4f);
     const ringMaterial = material(0xffc166);
+    const ticketMaterial = material(0xf9ca55);
+    const selectedMaterial = material(0x36e0df);
 
     const floorShape = new THREE.Shape();
     outline.forEach(([x, z], index) =>
@@ -267,6 +295,12 @@ export function Structure3DView({ language }: { language: Language }) {
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.22;
     scene.add(floor);
+    const selectedGeometry = new THREE.SphereGeometry(0.3, 20, 12);
+    geometries.push(selectedGeometry);
+    const selectedMarker = new THREE.Mesh(selectedGeometry, selectedMaterial);
+    selectedMarker.visible = false;
+    scene.add(selectedMarker);
+    selectedPointRef.current = selectedMarker;
 
     const addBox = (
       width: number,
@@ -386,9 +420,75 @@ export function Structure3DView({ language }: { language: Language }) {
     pin.userData.issue = true;
     scene.add(pin);
 
+    const ticketPoints: Record<TicketLocation, [number, number, number]> = {
+      unit: [-7.3, 2.1, 2.1],
+      corridor: [0, 1.7, -2.6],
+      lift: [-1.1, 3.05, -0.9],
+      stairs: [0.8, 2.25, 2.1],
+      "wet-area": [4.1, 2.05, 5.2],
+      ceiling: [-8.6, 3.55, -1.0],
+    };
+    for (const [key, position] of Object.entries(ticketPoints) as [
+      TicketLocation,
+      [number, number, number],
+    ][]) {
+      const geometry = new THREE.SphereGeometry(0.24, 18, 12);
+      geometries.push(geometry);
+      const marker = new THREE.Mesh(geometry, ticketMaterial);
+      marker.position.set(...position);
+      marker.userData.defaultPosition = position;
+      marker.userData.ticketLocation = key;
+      marker.visible = false;
+      scene.add(marker);
+      ticketMarkersRef.current[key] = marker;
+    }
+
     const grid = new THREE.GridHelper(34, 17, 0x51717b, 0x36515b);
     grid.position.y = -0.25;
     scene.add(grid);
+
+    const addLabel = (
+      label: string,
+      x: number,
+      y: number,
+      z: number,
+      color: string,
+    ) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 384;
+      canvas.height = 96;
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.fillStyle = "rgba(12, 30, 38, 0.88)";
+      context.beginPath();
+      context.roundRect(3, 3, 378, 90, 20);
+      context.fill();
+      context.strokeStyle = color;
+      context.lineWidth = 6;
+      context.stroke();
+      context.fillStyle = "#ffffff";
+      context.font = "bold 38px system-ui, sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(label, 192, 50, 350);
+      const texture = new THREE.CanvasTexture(canvas);
+      textures.push(texture);
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        depthTest: false,
+      });
+      materials.push(spriteMaterial);
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(x, y, z);
+      sprite.scale.set(3.1, 0.78, 1);
+      sprite.renderOrder = 10;
+      scene.add(sprite);
+    };
+    addLabel(t.structure3dLiftLabel, -0.95, 3.25, -0.9, "#74d7ed");
+    addLabel(t.structure3dStairLabel, 0.9, 2.0, 2.2, "#f4be78");
+    addLabel(t.structure3dCorridorLabel, -2.0, 0.65, -2.55, "#b6dae4");
+    addLabel(t.structure3dUnitLabel, -8.2, 1.9, 2.0, "#c9eccf");
+    addLabel(t.structure3dWetLabel, 4.35, 1.75, 5.2, "#97c5dc");
 
     const render = () => renderer.render(scene, camera);
     renderRef.current = render;
@@ -414,8 +514,29 @@ export function Structure3DView({ language }: { language: Language }) {
         -((event.clientY - bounds.top) / bounds.height) * 2 + 1,
       );
       raycaster.setFromCamera(pointer, camera);
-      if (raycaster.intersectObjects([pin, ring, patch]).length)
+      const ticketHit = raycaster
+        .intersectObjects(Object.values(ticketMarkersRef.current))
+        .find((hit) => hit.object.visible);
+      if (ticketHit) {
+        onLocationChange(
+          ticketHit.object.userData.ticketLocation as TicketLocation,
+        );
+        const hitPoint = ticketHit.object.position;
+        onModelPointChange({ x: hitPoint.x, z: hitPoint.z });
+        return;
+      }
+      if (raycaster.intersectObjects([pin, ring, patch]).length) {
+        onLocationChange("ceiling");
+        onModelPointChange({ x: -9.5, z: -1 });
         setIssueOpen(true);
+        return;
+      }
+      const floorHit = raycaster.intersectObject(floor)[0];
+      if (floorHit)
+        onModelPointChange({
+          x: Math.round(floorHit.point.x * 10) / 10,
+          z: Math.round(floorHit.point.z * 10) / 10,
+        });
     };
     renderer.domElement.addEventListener("click", click);
 
@@ -426,13 +547,16 @@ export function Structure3DView({ language }: { language: Language }) {
       controls.dispose();
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
+      textures.forEach((texture) => texture.dispose());
       renderer.dispose();
       renderer.domElement.remove();
       ceilingRef.current = null;
       resetRef.current = null;
       renderRef.current = null;
+      ticketMarkersRef.current = {};
+      selectedPointRef.current = null;
     };
-  }, []);
+  }, [language, onLocationChange, onModelPointChange, t]);
 
   useEffect(() => {
     if (ceilingRef.current) {
@@ -440,6 +564,35 @@ export function Structure3DView({ language }: { language: Language }) {
       renderRef.current?.();
     }
   }, [showCeiling]);
+
+  useEffect(() => {
+    for (const [key, marker] of Object.entries(ticketMarkersRef.current) as [
+      TicketLocation,
+      THREE.Mesh,
+    ][]) {
+      const ticket = tickets.find((item) => item.location === key);
+      marker.visible = Boolean(ticket);
+      const fallback = marker.userData.defaultPosition as [
+        number,
+        number,
+        number,
+      ];
+      marker.position.set(
+        ticket?.modelPoint?.x ?? fallback[0],
+        fallback[1],
+        ticket?.modelPoint?.z ?? fallback[2],
+      );
+    }
+    renderRef.current?.();
+  }, [tickets, language]);
+
+  useEffect(() => {
+    const marker = selectedPointRef.current;
+    if (!marker) return;
+    marker.visible = Boolean(modelPoint);
+    if (modelPoint) marker.position.set(modelPoint.x, 0.45, modelPoint.z);
+    renderRef.current?.();
+  }, [modelPoint, language]);
 
   return (
     <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_270px]">
@@ -463,22 +616,36 @@ export function Structure3DView({ language }: { language: Language }) {
       </div>
       <aside className="space-y-4 rounded-xl border border-white/10 bg-[#18272d] p-4 text-sm">
         <h3 className="text-lg font-semibold text-teal-100">
-          {t.structure3dTitle}
+          {t.structure3dTitle} · {floor}
+          {t.floorSuffix}
         </h3>
+        <p className="text-xs text-amber-200">
+          {tickets.length} {t.ticketCountShort}
+        </p>
         <p className="leading-6 text-slate-300">{t.structure3dExplanation}</p>
-        <div className="space-y-1.5 border-t border-white/10 pt-3 text-xs text-slate-300">
-          <p>
-            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#d5e4d6]" />
-            {t.structure3dUnits}
-          </p>
-          <p>
-            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#397c91]" />
-            {t.structure3dService}
-          </p>
-          <p>
-            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-sm bg-[#e2ad68]" />
-            {t.structure3dStairs}
-          </p>
+        <div className="grid grid-cols-2 gap-1.5 border-t border-white/10 pt-3 text-xs">
+          {(
+            [
+              "unit",
+              "corridor",
+              "lift",
+              "stairs",
+              "wet-area",
+              "ceiling",
+            ] as TicketLocation[]
+          ).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onLocationChange(key)}
+              className={`rounded px-2 py-1.5 text-left ${location === key ? "bg-teal-700 text-white" : "bg-[#101719] text-slate-300 hover:bg-slate-700"}`}
+            >
+              {t.ticketZoneNames[key]}
+              {tickets.some((ticket) => ticket.location === key)
+                ? ` · ${tickets.filter((ticket) => ticket.location === key).length}`
+                : ""}
+            </button>
+          ))}
         </div>
         <label className="flex items-center gap-2 text-slate-200">
           <input
