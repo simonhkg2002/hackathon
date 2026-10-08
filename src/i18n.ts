@@ -76,6 +76,20 @@ export const copy = {
       "1–43 樓參考圖；同座其他樓層另有圖則。此圖由第三方提供，不是屋宇署核准圖則，亦不能證明目前室內格局。",
     openFloorPlan: "開啟第１座 1–43 樓平面圖",
     floorPlanSource: "原始頁面",
+    layerTwoViews: "第二層視圖",
+    structure3dTab: "3D 結構示意",
+    floorPlanTab: "原始平面圖",
+    loading3d: "正在載入 3D 示意…",
+    structure3dTitle: "樓層 3D 剖面示意",
+    structure3dExplanation:
+      "以公開平面圖的中央核心和周邊單位概念建立。牆線、比例及層高未經測量，不能用作施工或安全判斷。",
+    structure3dCeiling: "顯示半透明天花",
+    structure3dReset: "重設視角",
+    structure3dControls: "拖曳旋轉 · 滾輪縮放 · 右鍵平移",
+    structure3dIssue: "天花剝落 · 模擬個案",
+    structure3dIssueDetail:
+      "紅色位置只示範住客如何標記及描述維修問題，並非此樓宇的實際事故紀錄。實際位置、相片、日期及處理狀態需由住客或管理處核實後提供。",
+    structure3dError: "此裝置無法啟動 3D 視圖；仍可切換到原始平面圖。",
   },
   en: {
     appTitle: "Hong Kong Building Map",
@@ -162,5 +176,20 @@ export const copy = {
       "Reference for floors 1–43; other floor variants are listed by the source. This third-party plan is not a Buildings Department approved plan and may not reflect the present interior.",
     openFloorPlan: "Open Block 1 floors 1–43 plan",
     floorPlanSource: "source page",
+    layerTwoViews: "Layer-two views",
+    structure3dTab: "3D structure concept",
+    floorPlanTab: "Source floor plan",
+    loading3d: "Loading 3D concept…",
+    structure3dTitle: "3D floor cutaway concept",
+    structure3dExplanation:
+      "A conceptual central core and surrounding units informed by the public plan. Walls, scale and floor height are unmeasured and must not guide construction or safety decisions.",
+    structure3dCeiling: "Show translucent ceilings",
+    structure3dReset: "Reset camera",
+    structure3dControls: "Drag to rotate · scroll to zoom · right-drag to pan",
+    structure3dIssue: "Ceiling plaster fall · simulated case",
+    structure3dIssueDetail:
+      "The red location only demonstrates how a resident could mark and describe a repair issue. It is not a real incident record for this building. A resident or manager must verify the actual location, photos, date and status.",
+    structure3dError:
+      "3D cannot start on this device; the source plan remains available.",
   },
 } as const;

@@ -85,4 +85,6 @@ Keep the map's built-in attribution visible. Map data and tile service terms app
 
 [新屯門中心第１座圖則資料](docs/public-floor-plan-example.md)列出可核對的公開參考平面圖及限制。第二層直接顯示該圖並連到來源頁面；這不是屋宇署核准圖則，亦不代表目前的室內狀況。
 
+第二層亦有可旋轉、縮放的 3D 樓層剖面示意，可切換半透明天花並點選「天花剝落」模擬標記。模型的牆線與尺寸未經核准圖則測量，紅色標記不是實際維修紀錄；詳見[圖則資料與 3D 精度說明](docs/public-floor-plan-example.md)。
+
 更新資料：`npm run data:refresh`（Python 3），完成後重新整理地圖。正式部署須帶同 `data/` 目錄。
