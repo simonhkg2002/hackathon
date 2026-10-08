@@ -70,9 +70,10 @@ export const copy = {
     backToMap: "返回地圖",
     layerTwoPublicNotice:
       "這是公開示範。000000 不是保安憑證，任何人都可查看和提交示範報修；請勿輸入姓名、電話、單位號碼或其他個人資料。",
-    floorSelector: "選擇樓層",
+    floorSelector: "選擇住宅樓層",
     floorSuffix: "樓",
-    floorModelNote: "共 44 層；3D 模型為共用示意，並非逐層核准圖則。",
+    floorModelNote:
+      "第 1 座的 1–44 樓為住宅樓層；未找到可核對的大堂圖則，故不顯示大堂模型。3D 模型為共用示意。",
     floorPlanAlt: "新屯門中心第１座 1–43 樓的第三方參考平面圖",
     floorPlanTitle: "新屯門中心第１座 · 公開參考平面圖",
     floorPlanCaution:
@@ -214,10 +215,10 @@ export const copy = {
     backToMap: "Back to map",
     layerTwoPublicNotice:
       "This is a public demo. 000000 is not a security credential; anyone can view or submit demo repair tickets. Do not enter names, phone numbers, unit numbers or other personal information.",
-    floorSelector: "Select floor",
+    floorSelector: "Select residential floor",
     floorSuffix: "F",
     floorModelNote:
-      "44 floors; the 3D model is a shared concept, not an approved plan for each floor.",
+      "Block 1 floors 1–44 are residential. No verifiable lobby plan was found, so the lobby is omitted. The 3D model is a shared concept.",
     floorPlanAlt:
       "Third-party reference plan for Sun Tuen Mun Centre Block 1, floors 1–43",
     floorPlanTitle: "Sun Tuen Mun Centre Block 1 · public reference plan",
