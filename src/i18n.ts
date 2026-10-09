@@ -69,12 +69,11 @@ export const copy = {
     layerTwoEyebrow: "第二層 · 公開圖則示範",
     backToMap: "返回地圖",
     layerTwoPublicNotice:
-      "這是公開示範。000000 不是保安憑證，任何人都可查看和提交示範報修；請勿輸入姓名、電話、單位號碼或其他個人資料。",
+      "公開示範：000000 沒有身份驗證；請勿填寫個人資料或單位號碼。",
     floorSelector: "選擇住宅樓層",
     floorSuffix: "樓",
-    floorModelNote:
-      "第 1 座的 1–44 樓為住宅樓層；未找到可核對的大堂圖則，故不顯示大堂模型。3D 模型為共用示意。",
-    floorIssueLegend: "🔴 有公共地方問題的樓層（包括模擬個案）",
+    floorModelNote: "1–44 樓為住宅層 · 大堂圖則未核實 · 3D 僅供示意",
+    floorIssueLegend: "🔴 有問題（含模擬）",
     floorPlanAlt: "新屯門中心第１座 1–43 樓的第三方參考平面圖",
     floorPlanTitle: "新屯門中心第１座 · 公開參考平面圖",
     floorPlanCaution:
@@ -90,32 +89,19 @@ export const copy = {
     floorPlanTab: "原始平面圖",
     loading3d: "正在載入 3D 示意…",
     structure3dTitle: "樓層 3D 剖面示意",
+    structure3dConceptBadge: "空間示意 · 非實測",
+    structure3dIssueList: "本層問題",
+    structure3dNoIssues: "此樓層暫無公共地方問題；可在下方提交示範回報。",
+    structure3dLocationHint: "問題標記只表示示意區域，並非現場量度的位置。",
     structure3dLiftLabel: "升降機",
     structure3dStairLabel: "樓梯",
-    structure3dCorridorLabel: "走廊",
     structure3dUnitLabel: "單位",
-    structure3dWetLabel: "濕區",
     structure3dExplanation:
-      "已加入單位房間分隔、門洞、濕區示意、中央走廊、升降機井及樓梯。牆身以剖切方式縮短，模型在畫面放大以方便觀察；各位置和尺寸未經測量，不能用作施工或安全判斷。",
-    structure3dUnits: "單位與房間",
-    structure3dService: "濕區／升降機",
-    structure3dStairs: "樓梯",
+      "牆身以剖切方式顯示，方便看清室內概念配置。模型與問題位置未經實測，不能用作施工或安全判斷。",
     structure3dCeiling: "顯示半透明天花",
     structure3dReset: "重設視角",
     structure3dControls: "點選樓面標記位置 · 拖曳旋轉 · 滾輪縮放 · 右鍵平移",
-    structure3dIssue: "天花剝落 · 模擬個案",
-    structure3dIssueDetail:
-      "紅色位置只示範住客如何標記及描述維修問題，並非此樓宇的實際事故紀錄。實際位置、相片、日期及處理狀態需由住客或管理處核實後提供。",
     structure3dError: "此裝置無法啟動 3D 視圖；仍可切換到原始平面圖。",
-    ticketZoneNames: {
-      unit: "單位",
-      corridor: "走廊",
-      lift: "升降機",
-      stairs: "樓梯",
-      "wet-area": "濕區",
-      ceiling: "天花",
-      facade: "外牆",
-    },
     ticketCountShort: "宗本層問題（含模擬）",
     ticketReportTitle: "住戶報修 · 示範 ticket",
     ticketPrivacy:
@@ -219,12 +205,12 @@ export const copy = {
     layerTwoEyebrow: "Layer two · public floor-plan demo",
     backToMap: "Back to map",
     layerTwoPublicNotice:
-      "This is a public demo. 000000 is not a security credential; anyone can view or submit demo repair tickets. Do not enter names, phone numbers, unit numbers or other personal information.",
+      "Public demo: 000000 does not verify identity. Do not enter personal information or unit numbers.",
     floorSelector: "Select residential floor",
     floorSuffix: "F",
     floorModelNote:
-      "Block 1 floors 1–44 are residential. No verifiable lobby plan was found, so the lobby is omitted. The 3D model is a shared concept.",
-    floorIssueLegend: "🔴 Floors with common-area issues (including samples)",
+      "Residential floors 1–44 · lobby plan unverified · 3D is conceptual",
+    floorIssueLegend: "🔴 Issues (incl. samples)",
     floorPlanAlt:
       "Third-party reference plan for Sun Tuen Mun Centre Block 1, floors 1–43",
     floorPlanTitle: "Sun Tuen Mun Centre Block 1 · public reference plan",
@@ -242,34 +228,23 @@ export const copy = {
     floorPlanTab: "Source floor plan",
     loading3d: "Loading 3D concept…",
     structure3dTitle: "3D floor cutaway concept",
+    structure3dConceptBadge: "Spatial concept · unmeasured",
+    structure3dIssueList: "Issues on this floor",
+    structure3dNoIssues:
+      "No common-area issues on this floor. A demo report can be submitted below.",
+    structure3dLocationHint:
+      "Issue markers indicate conceptual areas, not surveyed positions.",
     structure3dLiftLabel: "Lift",
     structure3dStairLabel: "Stairs",
-    structure3dCorridorLabel: "Corridor",
     structure3dUnitLabel: "Unit",
-    structure3dWetLabel: "Wet area",
     structure3dExplanation:
-      "The concept includes unit partitions, door openings, wet areas, a central corridor, lift shafts and stairs. Walls are cut down and the model is enlarged on screen for inspection; locations and dimensions are unmeasured and must not guide construction or safety decisions.",
-    structure3dUnits: "Units and rooms",
-    structure3dService: "Wet areas / lifts",
-    structure3dStairs: "Stairs",
+      "Cutaway walls reveal the concept layout. The model and issue positions are unmeasured and must not guide construction or safety decisions.",
     structure3dCeiling: "Show translucent ceilings",
     structure3dReset: "Reset camera",
     structure3dControls:
       "Click the floor to mark a location · drag to rotate · scroll to zoom · right-drag to pan",
-    structure3dIssue: "Ceiling plaster fall · simulated case",
-    structure3dIssueDetail:
-      "The red location only demonstrates how a resident could mark and describe a repair issue. It is not a real incident record for this building. A resident or manager must verify the actual location, photos, date and status.",
     structure3dError:
       "3D cannot start on this device; the source plan remains available.",
-    ticketZoneNames: {
-      unit: "Unit",
-      corridor: "Corridor",
-      lift: "Lift",
-      stairs: "Stairs",
-      "wet-area": "Wet area",
-      ceiling: "Ceiling",
-      facade: "Façade",
-    },
     ticketCountShort: "issues on this floor (including samples)",
     ticketReportTitle: "Resident repair report · demo ticket",
     ticketPrivacy:

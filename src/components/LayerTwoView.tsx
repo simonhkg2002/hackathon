@@ -71,7 +71,7 @@ export function LayerTwoView({
       aria-labelledby="layer-two-title"
       className="absolute inset-0 z-30 flex flex-col overflow-auto bg-[#101719] text-slate-100"
     >
-      <header className="flex items-start justify-between gap-5 border-b border-white/10 px-5 py-4 sm:px-8">
+      <header className="flex items-start justify-between gap-5 border-b border-white/10 px-5 py-3 sm:px-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-teal-300">
             {t.layerTwoEyebrow}
@@ -91,11 +91,11 @@ export function LayerTwoView({
           ← {t.backToMap}
         </button>
       </header>
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 p-5 sm:p-8">
-        <div className="rounded-xl border border-amber-300/20 bg-amber-300/5 p-4 text-sm leading-6 text-amber-100">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 p-4 sm:p-5">
+        <div className="rounded-lg border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-xs leading-5 text-amber-100">
           {t.layerTwoPublicNotice}
         </div>
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-[#18272d] px-4 py-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-[#18272d] px-3 py-2 text-sm">
           <label htmlFor="demo-floor" className="font-semibold text-teal-100">
             {t.floorSelector}
           </label>
@@ -160,8 +160,6 @@ export function LayerTwoView({
             <Structure3DView
               language={language}
               floor={floor}
-              location={location}
-              onLocationChange={setLocation}
               modelPoint={modelPoint}
               onModelPointChange={setModelPoint}
               tickets={allTickets.filter((ticket) => ticket.floor === floor)}

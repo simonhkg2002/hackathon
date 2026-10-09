@@ -57,7 +57,7 @@ const categoryNames: Record<Language, Record<TicketCategory, string>> = {
   },
 };
 
-export { locationNames };
+export { categoryNames, locationNames };
 
 export function RepairTickets({
   language,
